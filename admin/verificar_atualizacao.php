@@ -1,37 +1,32 @@
 <?php
-// No início do arquivo, antes de qualquer saída HTML
+// Prevenir qualquer saída HTML
+ob_start();
+
 require_once '../config/config.php';
 require_once 'verificar_permissao.php';
 require_once 'functions/atualizacao.php';
 
 // Rota para verificação via AJAX
 if (isset($_POST['acao'])) {
-    // Prevenir qualquer saída antes do JSON
+    // Limpar qualquer saída anterior
     ob_clean();
     header('Content-Type: application/json');
     
-    // Log para debug
-    error_log('POST recebido: ' . print_r($_POST, true));
-    
     try {
         if ($_POST['acao'] === 'verificar') {
-            echo json_encode(verificarAtualizacao());
+            echo json_encode(verificarAtualizacao(), JSON_THROW_ON_ERROR);
             exit;
         }
         elseif ($_POST['acao'] === 'atualizar') {
-            echo json_encode(atualizarSistema($_POST['download_url']));
+            echo json_encode(atualizarSistema($_POST['download_url']), JSON_THROW_ON_ERROR);
             exit;
         }
-    } catch (Exception $e) {
+    } catch (Throwable $e) {
         error_log('Erro na atualização: ' . $e->getMessage());
         echo json_encode([
             'error' => true,
-            'message' => $e->getMessage(),
-            'debug' => [
-                'post' => $_POST,
-                'trace' => $e->getTraceAsString()
-            ]
-        ]);
+            'message' => 'Erro ao processar requisição: ' . $e->getMessage()
+        ], JSON_THROW_ON_ERROR);
         exit;
     }
 }
@@ -237,11 +232,14 @@ include 'header.php';
                 method: 'POST',
                 body: formData
             })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
+            .then(async response => {
+                const text = await response.text();
+                try {
+                    return JSON.parse(text);
+                } catch (e) {
+                    console.error('Resposta não-JSON:', text);
+                    throw new Error('Resposta inválida do servidor');
                 }
-                return response.json();
             })
             .then(data => {
                 if (data.error) {
@@ -262,7 +260,8 @@ include 'header.php';
                 Swal.fire({
                     icon: 'error',
                     title: 'Erro na Atualização',
-                    text: error.message || 'Ocorreu um erro ao atualizar o sistema.'
+                    text: error.message || 'Ocorreu um erro ao atualizar o sistema.',
+                    confirmButtonText: 'Fechar'
                 });
             });
         }
