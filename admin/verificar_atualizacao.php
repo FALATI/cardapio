@@ -1,18 +1,37 @@
 <?php
+// No início do arquivo, antes de qualquer saída HTML
 require_once '../config/config.php';
 require_once 'verificar_permissao.php';
 require_once 'functions/atualizacao.php';
 
 // Rota para verificação via AJAX
 if (isset($_POST['acao'])) {
+    // Prevenir qualquer saída antes do JSON
+    ob_clean();
     header('Content-Type: application/json');
     
-    if ($_POST['acao'] === 'verificar') {
-        echo json_encode(verificarAtualizacao());
-        exit;
-    }
-    elseif ($_POST['acao'] === 'atualizar') {
-        echo json_encode(atualizarSistema($_POST['download_url']));
+    // Log para debug
+    error_log('POST recebido: ' . print_r($_POST, true));
+    
+    try {
+        if ($_POST['acao'] === 'verificar') {
+            echo json_encode(verificarAtualizacao());
+            exit;
+        }
+        elseif ($_POST['acao'] === 'atualizar') {
+            echo json_encode(atualizarSistema($_POST['download_url']));
+            exit;
+        }
+    } catch (Exception $e) {
+        error_log('Erro na atualização: ' . $e->getMessage());
+        echo json_encode([
+            'error' => true,
+            'message' => $e->getMessage(),
+            'debug' => [
+                'post' => $_POST,
+                'trace' => $e->getTraceAsString()
+            ]
+        ]);
         exit;
     }
 }
@@ -196,13 +215,18 @@ include 'header.php';
         function atualizarSistema(download_url) {
             Swal.fire({
                 title: 'Atualizando sistema',
-                html: 'Iniciando atualização...',
+                html: `
+                    <div class="text-start">
+                        <p class="mb-2">Iniciando atualização...</p>
+                        <div class="progress">
+                            <div class="progress-bar progress-bar-striped progress-bar-animated" 
+                                 role="progressbar" style="width: 0%">0%</div>
+                        </div>
+                    </div>
+                `,
                 allowOutsideClick: false,
                 allowEscapeKey: false,
-                showConfirmButton: false,
-                didOpen: () => {
-                    Swal.showLoading();
-                }
+                showConfirmButton: false
             });
 
             const formData = new FormData();
@@ -213,31 +237,32 @@ include 'header.php';
                 method: 'POST',
                 body: formData
             })
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
             .then(data => {
                 if (data.error) {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Erro',
-                        text: data.message
-                    });
-                } else {
-                    // Mostrar mensagem de sucesso e recarregar
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Sucesso!',
-                        text: 'Sistema atualizado com sucesso! A página será recarregada.',
-                        allowOutsideClick: false
-                    }).then(() => {
-                        window.location.reload();
-                    });
+                    throw new Error(data.message);
                 }
+                
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Sucesso!',
+                    text: data.message || 'Sistema atualizado com sucesso!',
+                    allowOutsideClick: false
+                }).then(() => {
+                    window.location.reload();
+                });
             })
             .catch(error => {
+                console.error('Erro:', error);
                 Swal.fire({
                     icon: 'error',
-                    title: 'Erro',
-                    text: 'Erro ao atualizar: ' + error.message
+                    title: 'Erro na Atualização',
+                    text: error.message || 'Ocorreu um erro ao atualizar o sistema.'
                 });
             });
         }
