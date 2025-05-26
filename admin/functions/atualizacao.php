@@ -91,37 +91,21 @@ function atualizarSistema($download_url) {
 
         // Download do arquivo
         $zip_file = $temp_dir . '/update.zip';
-        $progress = [
-            'status' => 'downloading',
-            'message' => 'Baixando arquivos de atualização...',
-            'progress' => 0
-        ];
         
-        $fp = fopen($zip_file, 'w+');
         $ch = curl_init($download_url);
         curl_setopt_array($ch, [
-            CURLOPT_FILE => $fp,
+            CURLOPT_FILE => fopen($zip_file, 'w+'),
             CURLOPT_FOLLOWLOCATION => true,
-            CURLOPT_USERAGENT => 'Cardapio-Update-Agent',
-            CURLOPT_NOPROGRESS => false,
-            CURLOPT_PROGRESSFUNCTION => function($resource, $download_size, $downloaded) use (&$progress) {
-                if ($download_size > 0) {
-                    $progress['progress'] = round(($downloaded / $download_size) * 100);
-                }
-            }
+            CURLOPT_SSL_VERIFYPEER => false,
+            CURLOPT_USERAGENT => 'Cardapio-Update-Agent'
         ]);
         
-        curl_exec($ch);
+        if (!curl_exec($ch)) {
+            throw new Exception('Erro ao baixar atualização: ' . curl_error($ch));
+        }
         curl_close($ch);
-        fclose($fp);
 
         // Extrair arquivo
-        $progress = [
-            'status' => 'extracting',
-            'message' => 'Extraindo arquivos...',
-            'progress' => 0
-        ];
-        
         $zip = new ZipArchive;
         if ($zip->open($zip_file) !== true) {
             throw new Exception('Erro ao abrir arquivo ZIP');
@@ -131,12 +115,6 @@ function atualizarSistema($download_url) {
         $zip->close();
 
         // Copiar arquivos
-        $progress = [
-            'status' => 'copying',
-            'message' => 'Copiando arquivos...',
-            'progress' => 0
-        ];
-        
         $source_dir = glob($temp_dir . '/*', GLOB_ONLYDIR)[0];
         $root_dir = realpath(__DIR__ . '/../../');
         
@@ -144,12 +122,25 @@ function atualizarSistema($download_url) {
         $backup_dir = sys_get_temp_dir() . '/cardapio_backup_' . time();
         mkdir($backup_dir, 0777, true);
         
-        // Copiar arquivos novos
-        $total_files = count(new RecursiveIteratorIterator(
-            new RecursiveDirectoryIterator($source_dir, RecursiveDirectoryIterator::SKIP_DOTS)
-        ));
+        // Função para contar arquivos recursivamente
+        function countFiles($dir) {
+            $count = 0;
+            $iterator = new RecursiveIteratorIterator(
+                new RecursiveDirectoryIterator($dir, RecursiveDirectoryIterator::SKIP_DOTS)
+            );
+            foreach ($iterator as $file) {
+                if ($file->isFile()) {
+                    $count++;
+                }
+            }
+            return $count;
+        }
+        
+        // Contar total de arquivos
+        $total_files = countFiles($source_dir);
         $copied_files = 0;
 
+        // Copiar arquivos novos
         $iterator = new RecursiveIteratorIterator(
             new RecursiveDirectoryIterator($source_dir, RecursiveDirectoryIterator::SKIP_DOTS),
             RecursiveIteratorIterator::SELF_FIRST
@@ -171,24 +162,19 @@ function atualizarSistema($download_url) {
             } else {
                 @mkdir(dirname($target), 0777, true);
                 copy($item->getPathname(), $target);
+                $copied_files++;
             }
-            
-            $copied_files++;
-            $progress['progress'] = round(($copied_files / $total_files) * 100);
         }
 
         // Limpar arquivos temporários
-        $progress = [
-            'status' => 'cleaning',
-            'message' => 'Limpando arquivos temporários...',
-            'progress' => 100
-        ];
-        
         deleteDir($temp_dir);
 
         return [
             'success' => true,
-            'message' => 'Atualização concluída com sucesso!',
+            'message' => sprintf(
+                'Atualização concluída com sucesso! %d arquivos atualizados.',
+                $copied_files
+            ),
             'backup_dir' => $backup_dir
         ];
 
@@ -198,11 +184,7 @@ function atualizarSistema($download_url) {
             restoreBackup($backup_dir, $root_dir);
         }
         
-        return [
-            'success' => false,
-            'error' => true,
-            'message' => 'Erro na atualização: ' . $e->getMessage()
-        ];
+        throw new Exception('Erro na atualização: ' . $e->getMessage());
     }
 }
 
