@@ -83,6 +83,11 @@ function verificarAtualizacao() {
 
 function atualizarSistema($download_url) {
     try {
+        // Validar URL de download
+        if (empty($download_url)) {
+            throw new Exception('URL de download não fornecida');
+        }
+
         // Criar diretório temporário
         $temp_dir = sys_get_temp_dir() . '/cardapio_update_' . time();
         if (!mkdir($temp_dir, 0777, true)) {
@@ -91,19 +96,39 @@ function atualizarSistema($download_url) {
 
         // Download do arquivo
         $zip_file = $temp_dir . '/update.zip';
+        $fp = fopen($zip_file, 'w+');
         
         $ch = curl_init($download_url);
         curl_setopt_array($ch, [
-            CURLOPT_FILE => fopen($zip_file, 'w+'),
+            CURLOPT_FILE => $fp,
             CURLOPT_FOLLOWLOCATION => true,
             CURLOPT_SSL_VERIFYPEER => false,
-            CURLOPT_USERAGENT => 'Cardapio-Update-Agent'
+            CURLOPT_USERAGENT => 'Cardapio-Update-Agent',
+            CURLOPT_TIMEOUT => 300, // 5 minutos
+            CURLOPT_HTTPHEADER => [
+                'Accept: application/vnd.github.v3+json'
+            ]
         ]);
         
-        if (!curl_exec($ch)) {
-            throw new Exception('Erro ao baixar atualização: ' . curl_error($ch));
-        }
+        $success = curl_exec($ch);
+        $curl_error = curl_error($ch);
+        $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        
         curl_close($ch);
+        fclose($fp);
+        
+        if (!$success) {
+            throw new Exception(sprintf(
+                'Erro ao baixar atualização: %s (HTTP Code: %d)',
+                $curl_error,
+                $http_code
+            ));
+        }
+
+        // Verificar se o arquivo foi baixado
+        if (!file_exists($zip_file) || filesize($zip_file) < 100) {
+            throw new Exception('Arquivo de atualização inválido ou vazio');
+        }
 
         // Extrair arquivo
         $zip = new ZipArchive;
@@ -175,7 +200,14 @@ function atualizarSistema($download_url) {
                 'Atualização concluída com sucesso! %d arquivos atualizados.',
                 $copied_files
             ),
-            'backup_dir' => $backup_dir
+            'backup_dir' => $backup_dir,
+            'debug' => [
+                'download_url' => $download_url,
+                'http_code' => $http_code,
+                'temp_dir' => $temp_dir,
+                'zip_size' => filesize($zip_file),
+                'files_updated' => $copied_files
+            ]
         ];
 
     } catch (Exception $e) {
@@ -184,7 +216,22 @@ function atualizarSistema($download_url) {
             restoreBackup($backup_dir, $root_dir);
         }
         
-        throw new Exception('Erro na atualização: ' . $e->getMessage());
+        // Limpar arquivos temporários
+        if (isset($temp_dir) && is_dir($temp_dir)) {
+            deleteDir($temp_dir);
+        }
+        
+        return [
+            'success' => false,
+            'error' => true,
+            'message' => 'Erro na atualização: ' . $e->getMessage(),
+            'debug' => [
+                'download_url' => $download_url ?? null,
+                'http_code' => $http_code ?? null,
+                'curl_error' => $curl_error ?? null,
+                'temp_dir' => $temp_dir ?? null
+            ]
+        ];
     }
 }
 
