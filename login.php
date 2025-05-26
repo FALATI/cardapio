@@ -111,8 +111,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                 <i class="bi bi-box-arrow-in-right me-2"></i>Entrar
                             </button>
                             <div class="text-center">
-                                <a href="#" class="text-decoration-none" onclick="abrirModalCadastro(); return false;">
+                                <a href="#" class="text-decoration-none mb-2 d-block" onclick="abrirModalCadastro(); return false;">
                                     Não tem uma conta? Cadastre-se
+                                </a>
+                                <a href="#" class="text-decoration-none" onclick="abrirModalRecuperacao(); return false;">
+                                    Esqueceu sua senha?
                                 </a>
                             </div>
                         </form>
@@ -127,9 +130,30 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         </div>
     </div>
 
+    <!-- Modal de Recuperação de Senha -->
+    <div class="modal fade" id="recuperacaoModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Recuperar Senha</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="recuperacaoForm" action="recuperar_senha.php" method="POST">
+                        <div class="mb-3">
+                            <label class="form-label">E-mail cadastrado</label>
+                            <input type="email" class="form-control" name="email" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">Enviar Link de Recuperação</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Modal de Cadastro -->
     <div class="modal fade" id="cadastroModal" tabindex="-1">
-        <div class="modal-dialog">
+        <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">Criar Conta</h5>
@@ -137,28 +161,46 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 </div>
                 <div class="modal-body">
                     <form id="cadastroForm" action="cadastrar_cliente.php" method="POST">
-                        <div class="mb-3">
-                            <label class="form-label">Nome Completo*</label>
-                            <input type="text" class="form-control" name="nome" required>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Nome Completo*</label>
+                                <input type="text" class="form-control" name="nome" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">E-mail*</label>
+                                <input type="email" class="form-control" name="email" required>
+                            </div>
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label">E-mail*</label>
-                            <input type="email" class="form-control" name="email" required>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Telefone/WhatsApp*</label>
+                                <input type="tel" class="form-control" id="telefone" name="telefone" 
+                                       required placeholder="(00) 00000-0000">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Bairro*</label>
+                                <input type="text" class="form-control" name="bairro" required>
+                            </div>
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label">Telefone/WhatsApp*</label>
-                            <input type="tel" class="form-control" id="telefone" name="telefone" 
-                                   required placeholder="(00) 00000-0000">
-                        </div>
+
                         <div class="mb-3">
                             <label class="form-label">Endereço Completo*</label>
                             <textarea class="form-control" name="endereco" rows="2" required
-                                      placeholder="Rua, número, bairro, complemento..."></textarea>
+                                      placeholder="Rua, número, complemento..."></textarea>
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label">Senha*</label>
-                            <input type="password" class="form-control" name="senha" required minlength="6">
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Senha*</label>
+                                <input type="password" class="form-control" name="senha" required minlength="6">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Confirmar Senha*</label>
+                                <input type="password" class="form-control" name="confirmar_senha" required minlength="6">
+                            </div>
                         </div>
+
                         <button type="submit" class="btn btn-primary w-100">Criar Conta</button>
                     </form>
                 </div>
@@ -174,8 +216,26 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         cadastroModal.show();
     }
 
+    function abrirModalRecuperacao() {
+        const recuperacaoModal = new bootstrap.Modal(document.getElementById('recuperacaoModal'));
+        recuperacaoModal.show();
+    }
+
     document.getElementById('cadastroForm').addEventListener('submit', function(e) {
         e.preventDefault();
+        
+        const senha = this.querySelector('[name="senha"]').value;
+        const confirmarSenha = this.querySelector('[name="confirmar_senha"]').value;
+        
+        if (senha !== confirmarSenha) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Erro',
+                text: 'As senhas não coincidem',
+                confirmButtonColor: '#ff6b00'
+            });
+            return;
+        }
         
         const formData = new FormData(this);
         
@@ -186,8 +246,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                // Redirecionar imediatamente após sucesso
-                window.location.replace('index.php');
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Sucesso!',
+                    text: 'Conta criada com sucesso!',
+                    confirmButtonColor: '#ff6b00'
+                }).then(() => {
+                    window.location.replace('index.php');
+                });
             } else {
                 Swal.fire({
                     icon: 'error',
@@ -222,6 +288,45 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             value = `(${value.substr(0, 2)}) ${value.substr(2)}`;
         }
         e.target.value = value;
+    });
+
+    document.getElementById('recuperacaoForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const formData = new FormData(this);
+        
+        fetch('recuperar_senha.php', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'E-mail Enviado',
+                    text: 'Verifique seu e-mail para recuperar sua senha',
+                    confirmButtonColor: '#ff6b00'
+                });
+                bootstrap.Modal.getInstance(document.getElementById('recuperacaoModal')).hide();
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Erro',
+                    text: data.message,
+                    confirmButtonColor: '#ff6b00'
+                });
+            }
+        })
+        .catch(error => {
+            console.error('Erro:', error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Erro',
+                text: 'Erro ao processar solicitação',
+                confirmButtonColor: '#ff6b00'
+            });
+        });
     });
     </script>
 </body>
