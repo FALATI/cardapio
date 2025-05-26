@@ -1,5 +1,5 @@
 <?php
-// Prevenir qualquer saída HTML
+// Prevenir qualquer saída
 ob_start();
 
 require_once '../config/config.php';
@@ -10,7 +10,10 @@ require_once 'functions/atualizacao.php';
 if (isset($_POST['acao'])) {
     // Limpar qualquer saída anterior
     ob_clean();
+    
+    // Definir headers
     header('Content-Type: application/json');
+    header('Cache-Control: no-cache, must-revalidate');
     
     try {
         if ($_POST['acao'] === 'verificar') {
@@ -18,7 +21,12 @@ if (isset($_POST['acao'])) {
             exit;
         }
         elseif ($_POST['acao'] === 'atualizar') {
-            echo json_encode(atualizarSistema($_POST['download_url']), JSON_THROW_ON_ERROR);
+            if (empty($_POST['download_url'])) {
+                throw new Exception('URL de download não fornecida');
+            }
+            
+            $resultado = atualizarSistema($_POST['download_url']);
+            echo json_encode($resultado, JSON_THROW_ON_ERROR);
             exit;
         }
     } catch (Throwable $e) {
@@ -208,6 +216,7 @@ include 'header.php';
         }
 
         function atualizarSistema(download_url) {
+            // Mostrar modal de progresso
             Swal.fire({
                 title: 'Atualizando sistema',
                 html: `
@@ -224,39 +233,48 @@ include 'header.php';
                 showConfirmButton: false
             });
 
+            // Preparar dados
             const formData = new FormData();
             formData.append('acao', 'atualizar');
             formData.append('download_url', download_url);
             
+            // Fazer requisição
             fetch('verificar_atualizacao.php', {
                 method: 'POST',
                 body: formData
             })
             .then(async response => {
+                // Primeiro pegar o texto da resposta
                 const text = await response.text();
-                try {
-                    return JSON.parse(text);
-                } catch (e) {
-                    console.error('Resposta não-JSON:', text);
-                    throw new Error('Resposta inválida do servidor');
-                }
-            })
-            .then(data => {
-                if (data.error) {
-                    throw new Error(data.message);
-                }
                 
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Sucesso!',
-                    text: data.message || 'Sistema atualizado com sucesso!',
-                    allowOutsideClick: false
-                }).then(() => {
-                    window.location.reload();
-                });
+                // Log para debug
+                console.log('Resposta do servidor:', text);
+                
+                try {
+                    // Tentar converter para JSON
+                    const data = JSON.parse(text);
+                    
+                    if (data.error) {
+                        throw new Error(data.message);
+                    }
+                    
+                    // Sucesso
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Sucesso!',
+                        text: data.message || 'Sistema atualizado com sucesso!',
+                        allowOutsideClick: false
+                    }).then(() => {
+                        window.location.reload();
+                    });
+                    
+                } catch (e) {
+                    console.error('Erro ao parsear JSON:', e);
+                    throw new Error('Resposta inválida do servidor: ' + text.substring(0, 100));
+                }
             })
             .catch(error => {
-                console.error('Erro:', error);
+                console.error('Erro completo:', error);
                 Swal.fire({
                     icon: 'error',
                     title: 'Erro na Atualização',
