@@ -9,7 +9,10 @@ $token = $_GET['token'] ?? '';
 if (empty($token)) {
     $erro = "Token não fornecido";
 } else {
-    // Verificar token no banco
+    // Debug do token recebido
+    error_log("Token recebido: " . $token);
+    
+    // Verificar token no banco com debug
     $sql = "SELECT r.*, u.email, u.id as usuario_id 
             FROM recuperacao_senha r 
             INNER JOIN usuarios u ON u.id = r.usuario_id 
@@ -26,8 +29,32 @@ if (empty($token)) {
         $stmt->execute();
         $result = $stmt->get_result();
         
+        // Debug do resultado
+        error_log("Registros encontrados: " . $result->num_rows);
+        
         if ($result->num_rows === 0) {
-            $erro = "Link inválido ou expirado. Solicite um novo link de recuperação.";
+            // Verificar por que o token é inválido
+            $sql_debug = "SELECT r.*, u.email 
+                         FROM recuperacao_senha r 
+                         LEFT JOIN usuarios u ON u.id = r.usuario_id 
+                         WHERE r.token = ?";
+            $stmt_debug = $conn->prepare($sql_debug);
+            $stmt_debug->bind_param("s", $token);
+            $stmt_debug->execute();
+            $result_debug = $stmt_debug->get_result();
+            
+            if ($row_debug = $result_debug->fetch_assoc()) {
+                if ($row_debug['usado'] == 1) {
+                    $erro = "Este link já foi utilizado. Solicite um novo link de recuperação.";
+                } elseif ($row_debug['expira'] <= date('Y-m-d H:i:s')) {
+                    $erro = "Este link expirou. Solicite um novo link de recuperação.";
+                } else {
+                    $erro = "Link inválido. Solicite um novo link de recuperação.";
+                }
+                error_log("Debug token: " . print_r($row_debug, true));
+            } else {
+                $erro = "Token não encontrado no banco de dados.";
+            }
         }
     }
 }
@@ -129,7 +156,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && empty($erro)) {
                             <div class="alert alert-danger">
                                 <?php echo $erro; ?>
                                 <div class="mt-3">
-                                    <a href="login.php" class="btn btn-primary">Voltar para Login</a>
+                                    <a href="login.php" class="btn btn-primary me-2">Voltar para Login</a>
+                                    <?php if (strpos($erro, 'expirou') !== false || strpos($erro, 'utilizado') !== false): ?>
+                                        <button type="button" class="btn btn-outline-primary" 
+                                                onclick="window.location.href='login.php?recovery=1'">
+                                            Solicitar Novo Link
+                                        </button>
+                                    <?php endif; ?>
                                 </div>
                             </div>
                         <?php endif; ?>

@@ -29,7 +29,7 @@ try {
     
     // Gerar token único
     $token = bin2hex(random_bytes(32));
-    $expira = date('Y-m-d H:i:s', strtotime('+1 hour'));
+    $expira = date('Y-m-d H:i:s', strtotime('+24 hours')));
     
     // Salvar token no banco
     $sql = "INSERT INTO recuperacao_senha (usuario_id, token, expira) VALUES (?, ?, ?)";
