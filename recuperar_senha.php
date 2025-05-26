@@ -1,5 +1,4 @@
 <?php
-
 require_once 'config/config.php';
 header('Content-Type: application/json');
 
@@ -27,11 +26,11 @@ try {
 
     $usuario = $result->fetch_assoc();
     
-    // Gerar token único
+    // Gerar token
     $token = bin2hex(random_bytes(32));
-    $expira = date('Y-m-d H:i:s', strtotime('+24 hours')));
+    $expira = date('Y-m-d H:i:s', strtotime('+24 hours'));
     
-    // Salvar token no banco
+    // Salvar token
     $sql = "INSERT INTO recuperacao_senha (usuario_id, token, expira) VALUES (?, ?, ?)";
     $stmt = $conn->prepare($sql);
     $stmt->bind_param("iss", $usuario['id'], $token, $expira);
@@ -52,7 +51,7 @@ try {
         <p>Você solicitou a recuperação de senha. Clique no link abaixo para criar uma nova senha:</p>
         <p><a href='{$resetLink}'>Redefinir minha senha</a></p>
         <p>Se você não solicitou esta recuperação, ignore este e-mail.</p>
-        <p>Este link expira em 1 hora.</p>
+        <p>Este link expira em 24 horas.</p>
     </body>
     </html>";
 
