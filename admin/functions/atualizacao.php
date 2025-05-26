@@ -83,7 +83,7 @@ function verificarAtualizacao() {
 
 function atualizarSistema($download_url) {
     try {
-        // Arquivos/pastas a serem ignorados na atualização
+        // Arquivos a ignorar
         $ignorar = [
             'config/config.php',
             'config/database.php',
@@ -91,9 +91,9 @@ function atualizarSistema($download_url) {
             '.env'
         ];
 
-        // Criar diretório temporário
-        $temp_dir = sys_get_temp_dir() . '/cardapio_update_' . time();
-        $backup_dir = sys_get_temp_dir() . '/cardapio_backup_' . time();
+        // Criar diretórios temporários
+        $temp_dir = rtrim(sys_get_temp_dir(), '/\\') . '/cardapio_update_' . time();
+        $backup_dir = rtrim(sys_get_temp_dir(), '/\\') . '/cardapio_backup_' . time();
         
         if (!mkdir($temp_dir, 0777, true) || !mkdir($backup_dir, 0777, true)) {
             throw new Exception('Não foi possível criar diretórios temporários');
@@ -113,12 +113,12 @@ function atualizarSistema($download_url) {
         ]);
         
         $success = curl_exec($ch);
-        if (!$success) {
-            throw new Exception('Erro ao baixar atualização: ' . curl_error($ch));
-        }
-        
         curl_close($ch);
         fclose($fp);
+
+        if (!$success) {
+            throw new Exception('Erro ao baixar atualização');
+        }
 
         // Extrair arquivo
         $zip = new ZipArchive;
@@ -126,59 +126,69 @@ function atualizarSistema($download_url) {
             throw new Exception('Erro ao abrir arquivo ZIP');
         }
         
-        // Extrair para pasta temporária
         $zip->extractTo($temp_dir);
         $zip->close();
 
         // Encontrar pasta raiz dos arquivos extraídos
-        $source_dir = glob($temp_dir . '/*', GLOB_ONLYDIR)[0];
+        $extracted_dirs = glob($temp_dir . '/*', GLOB_ONLYDIR);
+        if (empty($extracted_dirs)) {
+            throw new Exception('Nenhum diretório encontrado no ZIP');
+        }
+        $source_dir = $extracted_dirs[0];
+        
+        // Diretório raiz do sistema
         $root_dir = realpath(__DIR__ . '/../../');
 
-        // Backup dos arquivos existentes
+        // Fazer backup dos arquivos existentes
         $iterator = new RecursiveIteratorIterator(
             new RecursiveDirectoryIterator($root_dir, RecursiveDirectoryIterator::SKIP_DOTS),
             RecursiveIteratorIterator::SELF_FIRST
         );
 
         foreach ($iterator as $item) {
-            // Pular arquivos/pastas ignorados
-            $relative_path = str_replace($root_dir . '/', '', $item->getPathname());
-            if (shouldIgnoreFile($relative_path, $ignorar)) {
-                continue;
-            }
-
-            $backup_path = $backup_dir . '/' . $relative_path;
-            
-            if ($item->isDir()) {
-                @mkdir($backup_path, 0777, true);
-            } else {
-                @mkdir(dirname($backup_path), 0777, true);
-                copy($item->getPathname(), $backup_path);
-            }
-        }
-
-        // Copiar arquivos novos
-        $iterator = new RecursiveIteratorIterator(
-            new RecursiveDirectoryIterator($source_dir, RecursiveDirectoryIterator::SKIP_DOTS),
-            RecursiveIteratorIterator::SELF_FIRST
-        );
-
-        $updated_files = 0;
-        foreach ($iterator as $item) {
-            $relative_path = str_replace($source_dir . '/', '', $item->getPathname());
+            // Caminho relativo ao diretório raiz
+            $relative_path = str_replace($root_dir . DIRECTORY_SEPARATOR, '', $item->getPathname());
             
             // Pular arquivos ignorados
             if (shouldIgnoreFile($relative_path, $ignorar)) {
                 continue;
             }
 
-            $target = $root_dir . '/' . $relative_path;
+            $backup_path = $backup_dir . DIRECTORY_SEPARATOR . $relative_path;
+            
+            if ($item->isDir()) {
+                @mkdir($backup_path, 0777, true);
+            } else {
+                @mkdir(dirname($backup_path), 0777, true);
+                if (!copy($item->getPathname(), $backup_path)) {
+                    throw new Exception("Erro ao fazer backup do arquivo: {$relative_path}");
+                }
+            }
+        }
+
+        // Copiar arquivos novos
+        $updated_files = 0;
+        $iterator = new RecursiveIteratorIterator(
+            new RecursiveDirectoryIterator($source_dir, RecursiveDirectoryIterator::SKIP_DOTS),
+            RecursiveIteratorIterator::SELF_FIRST
+        );
+
+        foreach ($iterator as $item) {
+            $relative_path = str_replace($source_dir . DIRECTORY_SEPARATOR, '', $item->getPathname());
+            
+            if (shouldIgnoreFile($relative_path, $ignorar)) {
+                continue;
+            }
+
+            $target = $root_dir . DIRECTORY_SEPARATOR . $relative_path;
             
             if ($item->isDir()) {
                 @mkdir($target, 0777, true);
             } else {
                 @mkdir(dirname($target), 0777, true);
-                copy($item->getPathname(), $target);
+                if (!copy($item->getPathname(), $target)) {
+                    throw new Exception("Erro ao copiar arquivo: {$relative_path}");
+                }
                 $updated_files++;
             }
         }
@@ -188,19 +198,21 @@ function atualizarSistema($download_url) {
 
         return [
             'success' => true,
-            'message' => sprintf(
-                'Atualização concluída com sucesso! %d arquivos atualizados. Backup salvo em: %s',
-                $updated_files,
-                $backup_dir
-            ),
-            'files_updated' => $updated_files,
-            'backup_dir' => $backup_dir
+            'message' => "Atualização concluída! {$updated_files} arquivos atualizados.",
+            'files_updated' => $updated_files
         ];
 
     } catch (Exception $e) {
-        // Em caso de erro, restaurar backup
+        // Log do erro
+        error_log('Erro na atualização: ' . $e->getMessage());
+        
+        // Tentar restaurar backup
         if (isset($backup_dir) && is_dir($backup_dir)) {
-            restoreBackup($backup_dir, $root_dir);
+            try {
+                restoreBackup($backup_dir, $root_dir);
+            } catch (Exception $restore_error) {
+                error_log('Erro ao restaurar backup: ' . $restore_error->getMessage());
+            }
         }
         
         // Limpar temporários
@@ -209,17 +221,16 @@ function atualizarSistema($download_url) {
         }
         
         return [
-            'success' => false,
             'error' => true,
             'message' => 'Erro na atualização: ' . $e->getMessage()
         ];
     }
 }
 
-// Função auxiliar para verificar se arquivo deve ser ignorado
-function shouldIgnoreFile($file, $ignorar) {
-    foreach ($ignorar as $padrao) {
-        if (strpos($file, $padrao) === 0) {
+function shouldIgnoreFile($path, $ignorar) {
+    $path = str_replace('\\', '/', $path);
+    foreach ($ignorar as $pattern) {
+        if (strpos($path, $pattern) === 0) {
             return true;
         }
     }
