@@ -83,15 +83,20 @@ function verificarAtualizacao() {
 
 function atualizarSistema($download_url) {
     try {
-        // Validar URL de download
-        if (empty($download_url)) {
-            throw new Exception('URL de download não fornecida');
-        }
+        // Arquivos/pastas a serem ignorados na atualização
+        $ignorar = [
+            'config/config.php',
+            'config/database.php',
+            '.git',
+            '.env'
+        ];
 
         // Criar diretório temporário
         $temp_dir = sys_get_temp_dir() . '/cardapio_update_' . time();
-        if (!mkdir($temp_dir, 0777, true)) {
-            throw new Exception('Não foi possível criar diretório temporário');
+        $backup_dir = sys_get_temp_dir() . '/cardapio_backup_' . time();
+        
+        if (!mkdir($temp_dir, 0777, true) || !mkdir($backup_dir, 0777, true)) {
+            throw new Exception('Não foi possível criar diretórios temporários');
         }
 
         // Download do arquivo
@@ -104,31 +109,16 @@ function atualizarSistema($download_url) {
             CURLOPT_FOLLOWLOCATION => true,
             CURLOPT_SSL_VERIFYPEER => false,
             CURLOPT_USERAGENT => 'Cardapio-Update-Agent',
-            CURLOPT_TIMEOUT => 300, // 5 minutos
-            CURLOPT_HTTPHEADER => [
-                'Accept: application/vnd.github.v3+json'
-            ]
+            CURLOPT_TIMEOUT => 300
         ]);
         
         $success = curl_exec($ch);
-        $curl_error = curl_error($ch);
-        $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        if (!$success) {
+            throw new Exception('Erro ao baixar atualização: ' . curl_error($ch));
+        }
         
         curl_close($ch);
         fclose($fp);
-        
-        if (!$success) {
-            throw new Exception(sprintf(
-                'Erro ao baixar atualização: %s (HTTP Code: %d)',
-                $curl_error,
-                $http_code
-            ));
-        }
-
-        // Verificar se o arquivo foi baixado
-        if (!file_exists($zip_file) || filesize($zip_file) < 100) {
-            throw new Exception('Arquivo de atualização inválido ou vazio');
-        }
 
         // Extrair arquivo
         $zip = new ZipArchive;
@@ -136,34 +126,36 @@ function atualizarSistema($download_url) {
             throw new Exception('Erro ao abrir arquivo ZIP');
         }
         
+        // Extrair para pasta temporária
         $zip->extractTo($temp_dir);
         $zip->close();
 
-        // Copiar arquivos
+        // Encontrar pasta raiz dos arquivos extraídos
         $source_dir = glob($temp_dir . '/*', GLOB_ONLYDIR)[0];
         $root_dir = realpath(__DIR__ . '/../../');
-        
-        // Fazer backup dos arquivos existentes
-        $backup_dir = sys_get_temp_dir() . '/cardapio_backup_' . time();
-        mkdir($backup_dir, 0777, true);
-        
-        // Função para contar arquivos recursivamente
-        function countFiles($dir) {
-            $count = 0;
-            $iterator = new RecursiveIteratorIterator(
-                new RecursiveDirectoryIterator($dir, RecursiveDirectoryIterator::SKIP_DOTS)
-            );
-            foreach ($iterator as $file) {
-                if ($file->isFile()) {
-                    $count++;
-                }
+
+        // Backup dos arquivos existentes
+        $iterator = new RecursiveIteratorIterator(
+            new RecursiveDirectoryIterator($root_dir, RecursiveDirectoryIterator::SKIP_DOTS),
+            RecursiveIteratorIterator::SELF_FIRST
+        );
+
+        foreach ($iterator as $item) {
+            // Pular arquivos/pastas ignorados
+            $relative_path = str_replace($root_dir . '/', '', $item->getPathname());
+            if (shouldIgnoreFile($relative_path, $ignorar)) {
+                continue;
             }
-            return $count;
+
+            $backup_path = $backup_dir . '/' . $relative_path;
+            
+            if ($item->isDir()) {
+                @mkdir($backup_path, 0777, true);
+            } else {
+                @mkdir(dirname($backup_path), 0777, true);
+                copy($item->getPathname(), $backup_path);
+            }
         }
-        
-        // Contar total de arquivos
-        $total_files = countFiles($source_dir);
-        $copied_files = 0;
 
         // Copiar arquivos novos
         $iterator = new RecursiveIteratorIterator(
@@ -171,23 +163,23 @@ function atualizarSistema($download_url) {
             RecursiveIteratorIterator::SELF_FIRST
         );
 
+        $updated_files = 0;
         foreach ($iterator as $item) {
-            $path = $iterator->getSubPathName();
-            $target = $root_dir . '/' . $path;
+            $relative_path = str_replace($source_dir . '/', '', $item->getPathname());
             
-            // Fazer backup do arquivo existente
-            if (file_exists($target)) {
-                $backup_path = $backup_dir . '/' . $path;
-                @mkdir(dirname($backup_path), 0777, true);
-                copy($target, $backup_path);
+            // Pular arquivos ignorados
+            if (shouldIgnoreFile($relative_path, $ignorar)) {
+                continue;
             }
+
+            $target = $root_dir . '/' . $relative_path;
             
             if ($item->isDir()) {
                 @mkdir($target, 0777, true);
             } else {
                 @mkdir(dirname($target), 0777, true);
                 copy($item->getPathname(), $target);
-                $copied_files++;
+                $updated_files++;
             }
         }
 
@@ -197,26 +189,21 @@ function atualizarSistema($download_url) {
         return [
             'success' => true,
             'message' => sprintf(
-                'Atualização concluída com sucesso! %d arquivos atualizados.',
-                $copied_files
+                'Atualização concluída com sucesso! %d arquivos atualizados. Backup salvo em: %s',
+                $updated_files,
+                $backup_dir
             ),
-            'backup_dir' => $backup_dir,
-            'debug' => [
-                'download_url' => $download_url,
-                'http_code' => $http_code,
-                'temp_dir' => $temp_dir,
-                'zip_size' => filesize($zip_file),
-                'files_updated' => $copied_files
-            ]
+            'files_updated' => $updated_files,
+            'backup_dir' => $backup_dir
         ];
 
     } catch (Exception $e) {
-        // Em caso de erro, tentar restaurar backup
+        // Em caso de erro, restaurar backup
         if (isset($backup_dir) && is_dir($backup_dir)) {
             restoreBackup($backup_dir, $root_dir);
         }
         
-        // Limpar arquivos temporários
+        // Limpar temporários
         if (isset($temp_dir) && is_dir($temp_dir)) {
             deleteDir($temp_dir);
         }
@@ -224,15 +211,19 @@ function atualizarSistema($download_url) {
         return [
             'success' => false,
             'error' => true,
-            'message' => 'Erro na atualização: ' . $e->getMessage(),
-            'debug' => [
-                'download_url' => $download_url ?? null,
-                'http_code' => $http_code ?? null,
-                'curl_error' => $curl_error ?? null,
-                'temp_dir' => $temp_dir ?? null
-            ]
+            'message' => 'Erro na atualização: ' . $e->getMessage()
         ];
     }
+}
+
+// Função auxiliar para verificar se arquivo deve ser ignorado
+function shouldIgnoreFile($file, $ignorar) {
+    foreach ($ignorar as $padrao) {
+        if (strpos($file, $padrao) === 0) {
+            return true;
+        }
+    }
+    return false;
 }
 
 function deleteDir($dir) {
