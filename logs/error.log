@@ -1,0 +1,82 @@
+[2025-05-12 16:18:50] Dados antes da query:
+Data: Array
+(
+    [usuario_id] => 3
+    [total_pedido] => 31
+    [observacoes] => 
+    [endereco] => Estrada dos Alpes 914
+    [bairro] => Cascata
+    [telefone] => (51) 99773-7323
+    [forma_pagamento_id] => 1
+    [forma_entrega_id] => 1
+    [taxa_entrega] => 5
+)
+
+----------------------------------------
+[2025-05-12 16:18:50] SQL Query:
+Data: Array
+(
+    [sql] => INSERT INTO pedidos (
+                usuario_id, 
+                total, 
+                observacoes, 
+                endereco, 
+                bairro, 
+                telefone, 
+                forma_pagamento_id, 
+                forma_entrega_id, 
+                taxa_entrega, 
+                status
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'pendente')
+)
+
+----------------------------------------
+[2025-05-12 16:18:50] Erro na preparação da query:
+Data: Array
+(
+    [error] => 
+    [errno] => 0
+)
+
+----------------------------------------
+[2025-05-12 16:19:10] Dados antes da query:
+Data: Array
+(
+    [usuario_id] => 3
+    [total_pedido] => 31
+    [observacoes] => 
+    [endereco] => Estrada dos Alpes 914
+    [bairro] => Cascata
+    [telefone] => (51) 99773-7323
+    [forma_pagamento_id] => 1
+    [forma_entrega_id] => 1
+    [taxa_entrega] => 5
+)
+
+----------------------------------------
+[2025-05-12 16:19:10] SQL Query:
+Data: Array
+(
+    [sql] => INSERT INTO pedidos (
+                usuario_id, 
+                total, 
+                observacoes, 
+                endereco, 
+                bairro, 
+                telefone, 
+                forma_pagamento_id, 
+                forma_entrega_id, 
+                taxa_entrega, 
+                status
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'pendente')
+)
+
+----------------------------------------
+[2025-05-12 16:19:10] Erro na preparação da query:
+Data: Array
+(
+    [error] => 
+    [errno] => 0
+)
+
+----------------------------------------

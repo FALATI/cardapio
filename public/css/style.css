@@ -1,0 +1,68 @@
+:root {
+    --bs-primary: #ff6b00;
+    --bs-primary-rgb: 255, 107, 0;
+}
+
+.btn-primary {
+    background-color: var(--bs-primary);
+    border-color: var(--bs-primary);
+}
+
+.btn-primary:hover {
+    background-color: #e65100;
+    border-color: #e65100;
+}
+
+.btn-outline-primary {
+    color: var(--bs-primary);
+    border-color: var(--bs-primary);
+}
+
+.btn-outline-primary:hover {
+    background-color: var(--bs-primary);
+    border-color: var(--bs-primary);
+}
+
+/* Adiciona rolagem suave ao clicar nas categorias */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Estilo para o menu de categorias com rolagem */
+.categorias-scroll {
+    display: flex;
+    overflow-x: auto;
+    padding: 0.5rem 0;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    scrollbar-color: var(--bs-primary) transparent;
+}
+
+.categorias-scroll::-webkit-scrollbar {
+    height: 6px;
+}
+
+.categorias-scroll::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.categorias-scroll::-webkit-scrollbar-thumb {
+    background-color: var(--bs-primary);
+    border-radius: 6px;
+}
+
+/* Anima os cards ao passar o mouse */
+.card {
+    transition: all 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 .5rem 1rem rgba(var(--bs-primary-rgb), .15)!important;
+}
+
+/* Ajusta imagens dos produtos */
+.card-img-top {
+    height: 200px;
+    object-fit: cover;
+}

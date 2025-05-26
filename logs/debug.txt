@@ -1,0 +1,194 @@
+[2025-05-12 16:24:04] Iniciando inserção do pedido
+Dados: Array
+(
+    [usuario_id] => 3
+    [total_pedido] => 31
+    [bairro] => Cascata
+    [taxa_entrega] => 5
+)
+
+----------------------------------------
+[2025-05-12 16:24:04] Query preparada
+Dados: Array
+(
+    [sql] => INSERT INTO pedidos (
+                    usuario_id, 
+                    total, 
+                    observacoes, 
+                    endereco, 
+                    bairro, 
+                    telefone, 
+                    forma_pagamento_id, 
+                    forma_entrega_id, 
+                    taxa_entrega, 
+                    status
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'pendente')
+)
+
+----------------------------------------
+[2025-05-12 16:24:04] Erro na preparação
+Dados: Array
+(
+    [error] => 
+)
+
+----------------------------------------
+[2025-05-12 16:31:11] Estado da conexão
+Dados: Array
+(
+    [connect_errno] => 0
+    [connect_error] => 
+    [errno] => 0
+    [error] => 
+)
+
+----------------------------------------
+[2025-05-12 16:31:11] Valores para inserção
+Dados: Array
+(
+    [usuario_id] => 3
+    [total_pedido] => 26
+    [observacoes] => 
+    [endereco] => Estrada dos Alpes 914
+    [bairro] => Cascata
+    [telefone] => (51) 99773-7323
+    [forma_pagamento_id] => 1
+    [forma_entrega_id] => 2
+    [taxa_entrega] => 0
+)
+
+----------------------------------------
+[2025-05-12 16:31:11] Erro detalhado na preparação
+Dados: Array
+(
+    [errno] => 0
+    [error] => 
+    [sqlstate] => 00000
+)
+
+----------------------------------------
+[2025-05-12 16:40:26] Nova query
+Dados: Array
+(
+    [sql] => INSERT INTO pedidos SET 
+                    usuario_id = ?, 
+                    total = ?, 
+                    observacoes = ?, 
+                    endereco = ?, 
+                    bairro = ?, 
+                    telefone = ?, 
+                    forma_pagamento_id = ?, 
+                    forma_entrega_id = ?, 
+                    taxa_entrega = ?, 
+                    status = 'pendente'
+)
+
+----------------------------------------
+[2025-05-12 16:40:26] Erro durante a inserção
+Dados: Array
+(
+    [mensagem] => Erro na preparação: 
+    [linha] => 240
+    [arquivo] => D:\Xampp\htdocs\cardapio\finalizar_pedido.php
+)
+
+----------------------------------------
+[2025-05-12 16:43:14] Nova query
+Dados: Array
+(
+    [sql] => INSERT INTO pedidos (
+                    usuario_id, total, observacoes, endereco, bairro, 
+                    telefone, forma_pagamento_id, forma_entrega_id, 
+                    taxa_entrega, status
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'pendente')
+)
+
+----------------------------------------
+[2025-05-12 16:43:14] Erro na preparação
+Dados: Array
+(
+    [errno] => 0
+    [error] => 
+    [sql] => INSERT INTO pedidos (
+                    usuario_id, total, observacoes, endereco, bairro, 
+                    telefone, forma_pagamento_id, forma_entrega_id, 
+                    taxa_entrega, status
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'pendente')
+)
+
+----------------------------------------
+[2025-05-12 16:43:14] Erro durante a inserção
+Dados: Array
+(
+    [mensagem] => Erro na preparação: 
+    [linha] => 233
+    [arquivo] => D:\Xampp\htdocs\cardapio\finalizar_pedido.php
+)
+
+----------------------------------------
+[2025-05-12 16:56:04] Nova query
+Dados: Array
+(
+    [sql] => INSERT INTO pedidos (
+                    usuario_id, total, observacoes, endereco, bairro, 
+                    telefone, forma_pagamento_id, forma_entrega_id, 
+                    taxa_entrega, status
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'pendente')
+)
+
+----------------------------------------
+[2025-05-12 16:56:04] Erro na preparação
+Dados: Array
+(
+    [errno] => 0
+    [error] => 
+    [sql] => INSERT INTO pedidos (
+                    usuario_id, total, observacoes, endereco, bairro, 
+                    telefone, forma_pagamento_id, forma_entrega_id, 
+                    taxa_entrega, status
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'pendente')
+)
+
+----------------------------------------
+[2025-05-12 16:56:04] Erro durante a inserção
+Dados: Array
+(
+    [mensagem] => Erro na preparação: 
+    [linha] => 219
+    [arquivo] => D:\Xampp\htdocs\cardapio\finalizar_pedido.php
+)
+
+----------------------------------------
+[2025-05-12 16:58:11] Dados para inserção
+Dados: Array
+(
+    [usuario_id] => 3
+    [total_pedido] => 31
+    [observacoes] => 
+    [endereco] => Estrada dos Alpes 914
+    [bairro] => Cascata
+    [telefone] => (51) 99773-7323
+    [forma_pagamento_id] => 1
+    [forma_entrega_id] => 1
+    [taxa_entrega] => 5
+)
+
+----------------------------------------
+[2025-05-12 16:58:11] Erro na preparação
+Dados: Array
+(
+    [errno] => 0
+    [error] => 
+    [sql] => INSERT INTO pedidos (usuario_id, total, observacoes, endereco, bairro, telefone, forma_pagamento_id, forma_entrega_id, taxa_entrega, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'pendente')
+)
+
+----------------------------------------
+[2025-05-12 16:58:11] Erro durante a inserção
+Dados: Array
+(
+    [mensagem] => Erro na preparação: 
+    [linha] => 227
+    [arquivo] => D:\Xampp\htdocs\cardapio\finalizar_pedido.php
+)
+
+----------------------------------------
