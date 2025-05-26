@@ -50,6 +50,12 @@
                 <i class="bi bi-gear me-2"></i> Configurações
             </a>
         </li>
+        <li class="nav-item">
+            <a class="nav-link <?php echo basename($_SERVER['PHP_SELF']) == 'verificar_atualizacao.php' ? 'active' : ''; ?>" 
+               href="verificar_atualizacao.php">
+                <i class="bi bi-arrow-clockwise me-2"></i> Atualização
+            </a>
+        </li>
         <li class="nav-item mt-4">
             <a class="nav-link text-danger" href="../logout.php">
                 <i class="bi bi-box-arrow-right me-2"></i> Sair
