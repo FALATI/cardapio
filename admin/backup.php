@@ -2,6 +2,16 @@
 require_once '../config/config.php';
 require_once 'verificar_permissao.php';
 
+// Buscar nome do site das configurações
+$sql = "SELECT valor FROM configuracoes WHERE chave = 'site_nome' LIMIT 1";
+$result = $conn->query($sql);
+$site_nome = "Sistema";  // valor padrão
+
+if ($result && $result->num_rows > 0) {
+    $row = $result->fetch_assoc();
+    $site_nome = $row['valor'];
+}
+
 // Nome do arquivo
 $filename = 'backup_' . date('Y-m-d_H-i-s') . '.sql';
 
@@ -19,7 +29,7 @@ while ($row = $result->fetch_row()) {
 // Início do arquivo SQL
 echo "-- Backup do banco de dados\n";
 echo "-- Data: " . date('Y-m-d H:i:s') . "\n";
-echo "-- Sistema: " . SITE_NAME . "\n\n";
+echo "-- Sistema: " . $site_nome . "\n\n";
 
 // Backup de cada tabela
 foreach ($tables as $table) {
