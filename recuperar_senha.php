@@ -26,45 +26,69 @@ try {
 
     $usuario = $result->fetch_assoc();
     
-    // Gerar token
-    $token = bin2hex(random_bytes(32));
-    $expira = date('Y-m-d H:i:s', strtotime('+24 hours'));
+    // Início da transação
+    $conn->begin_transaction();
     
-    // Salvar token
-    $sql = "INSERT INTO recuperacao_senha (usuario_id, token, expira) VALUES (?, ?, ?)";
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param("iss", $usuario['id'], $token, $expira);
-    
-    if (!$stmt->execute()) {
-        throw new Exception('Erro ao gerar token');
+    try {
+        // Invalidar tokens anteriores
+        $sql = "UPDATE recuperacao_senha SET usado = 1 WHERE usuario_id = ? AND usado = 0";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("i", $usuario['id']);
+        $stmt->execute();
+        
+        // Gerar novo token
+        $token = bin2hex(random_bytes(32));
+        $expira = date('Y-m-d H:i:s', strtotime('+24 hours'));
+        
+        // Salvar token
+        $sql = "INSERT INTO recuperacao_senha (usuario_id, token, expira) VALUES (?, ?, ?)";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("iss", $usuario['id'], $token, $expira);
+        
+        if (!$stmt->execute()) {
+            throw new Exception('Erro ao gerar token');
+        }
+        
+        // Confirmar transação
+        $conn->commit();
+        
+        // Log para debug
+        error_log("Token gerado: " . $token);
+        error_log("Para usuário ID: " . $usuario['id']);
+        
+        // Preparar e enviar email
+        $resetLink = SITE_URL . "/redefinir_senha.php?token=" . $token;
+        $mensagem = "
+        <html>
+        <head>
+            <title>Recuperação de Senha</title>
+        </head>
+        <body>
+            <h2>Olá {$usuario['nome']},</h2>
+            <p>Você solicitou a recuperação de senha. Clique no link abaixo para criar uma nova senha:</p>
+            <p><a href='{$resetLink}'>Redefinir minha senha</a></p>
+            <p>Se você não solicitou esta recuperação, ignore este e-mail.</p>
+            <p>Este link expira em 24 horas.</p>
+        </body>
+        </html>";
+
+        $headers = "MIME-Version: 1.0\r\n";
+        $headers .= "Content-Type: text/html; charset=UTF-8\r\n";
+        $headers .= "From: " . SITE_NAME . " <noreply@seudominio.com>\r\n";
+
+        if (!mail($email, "Recuperação de Senha - " . SITE_NAME, $mensagem, $headers)) {
+            throw new Exception('Erro ao enviar e-mail');
+        }
+
+        echo json_encode(['success' => true]);
+        
+    } catch (Exception $e) {
+        // Reverter transação em caso de erro
+        $conn->rollback();
+        throw $e;
     }
-
-    // Preparar e enviar email
-    $resetLink = SITE_URL . "/redefinir_senha.php?token=" . $token;
-    $mensagem = "
-    <html>
-    <head>
-        <title>Recuperação de Senha</title>
-    </head>
-    <body>
-        <h2>Olá {$usuario['nome']},</h2>
-        <p>Você solicitou a recuperação de senha. Clique no link abaixo para criar uma nova senha:</p>
-        <p><a href='{$resetLink}'>Redefinir minha senha</a></p>
-        <p>Se você não solicitou esta recuperação, ignore este e-mail.</p>
-        <p>Este link expira em 24 horas.</p>
-    </body>
-    </html>";
-
-    $headers = "MIME-Version: 1.0\r\n";
-    $headers .= "Content-Type: text/html; charset=UTF-8\r\n";
-    $headers .= "From: " . SITE_NAME . " <noreply@seudominio.com>\r\n";
-
-    if (!mail($email, "Recuperação de Senha - " . SITE_NAME, $mensagem, $headers)) {
-        throw new Exception('Erro ao enviar e-mail');
-    }
-
-    echo json_encode(['success' => true]);
 
 } catch (Exception $e) {
+    error_log("Erro na recuperação de senha: " . $e->getMessage());
     echo json_encode(['success' => false, 'message' => $e->getMessage()]);
 }
