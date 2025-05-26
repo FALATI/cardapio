@@ -140,8 +140,83 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
 
+        // Processar alterações do administrador
+        if (!empty($_POST['admin_nome']) || !empty($_POST['admin_email']) || !empty($_POST['admin_senha'])) {
+            // Buscar ID do admin
+            $sql = "SELECT id FROM usuarios WHERE tipo = 'admin' LIMIT 1";
+            $result = $conn->query($sql);
+            
+            if (!$result) {
+                throw new Exception("Erro ao buscar admin: " . $conn->error);
+            }
+            
+            $admin = $result->fetch_assoc();
+            
+            if ($admin) {
+                $updates = [];
+                $params = [];
+                $types = '';
+                
+                // Preparar atualizações
+                if (!empty($_POST['admin_nome'])) {
+                    $updates[] = "nome = ?";
+                    $params[] = $_POST['admin_nome'];
+                    $types .= 's';
+                }
+                
+                if (!empty($_POST['admin_email'])) {
+                    $updates[] = "email = ?";
+                    $params[] = $_POST['admin_email'];
+                    $types .= 's';
+                }
+                
+                if (!empty($_POST['admin_senha'])) {
+                    $updates[] = "senha = ?";
+                    $params[] = password_hash($_POST['admin_senha'], PASSWORD_DEFAULT);
+                    $types .= 's';
+                }
+                
+                // Executar atualização se houver mudanças
+                if (!empty($updates)) {
+                    $sql = "UPDATE usuarios SET " . implode(', ', $updates) . " WHERE id = ? AND tipo = 'admin'";
+                    $params[] = $admin['id'];
+                    $types .= 'i';
+                    
+                    $stmt = $conn->prepare($sql);
+                    if (!$stmt) {
+                        throw new Exception("Erro ao preparar query: " . $conn->error);
+                    }
+                    
+                    $stmt->bind_param($types, ...$params);
+                    
+                    if (!$stmt->execute()) {
+                        throw new Exception("Erro ao atualizar dados: " . $stmt->error);
+                    }
+                    
+                    // Atualizar mensagem de sucesso
+                    $mensagem = "Dados do administrador atualizados com sucesso!";
+                    
+                    // Atualizar dados da sessão
+                    if (!empty($_POST['admin_nome'])) {
+                        $_SESSION['usuario_nome'] = $_POST['admin_nome'];
+                    }
+                    if (!empty($_POST['admin_email'])) {
+                        $_SESSION['usuario_email'] = $_POST['admin_email'];
+                    }
+                    
+                    // Recarregar dados do admin
+                    $sql = "SELECT id, nome, email FROM usuarios WHERE tipo = 'admin' LIMIT 1";
+                    $result = $conn->query($sql);
+                    if ($result) {
+                        $admin = $result->fetch_assoc();
+                    }
+                }
+            }
+        }
+        
     } catch (Exception $e) {
         $mensagem = "Erro: " . $e->getMessage();
+        error_log($mensagem);
     }
 }
 
@@ -485,6 +560,62 @@ function atualizarConfig($chave, $valor) {
                             </div>
                         </div>
 
+                        <!-- Credenciais do Administrador -->
+                        <div class="card mb-4">
+                            <div class="card-header bg-light">
+                                <h5 class="mb-0">
+                                    <i class="bi bi-shield-lock me-2"></i>
+                                    Credenciais do Administrador
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <?php
+                                // Buscar dados do admin
+                                $sql = "SELECT id, nome, email FROM usuarios WHERE tipo = 'admin' LIMIT 1";
+                                $result = $conn->query($sql);
+                                $admin = $result->fetch_assoc();
+                                ?>
+                                
+                                <!-- Dados atuais -->
+                                <div class="alert alert-info mb-4">
+                                    <div class="d-flex align-items-center">
+                                        <div>
+                                            <i class="bi bi-person-circle me-2"></i>
+                                            Admin atual: <strong><?php echo htmlspecialchars($admin['nome']); ?></strong>
+                                            <small class="text-muted ms-2">(<?php echo htmlspecialchars($admin['email']); ?>)</small>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Formulário de edição -->
+                                <div class="row">
+                                    <div class="col-md-4 mb-3">
+                                        <label class="form-label">Nome</label>
+                                        <input type="text" class="form-control" name="admin_nome" 
+                                               value="<?php echo htmlspecialchars($admin['nome']); ?>">
+                                    </div>
+                                    
+                                    <div class="col-md-4 mb-3">
+                                        <label class="form-label">Email</label>
+                                        <input type="email" class="form-control" name="admin_email" 
+                                               value="<?php echo htmlspecialchars($admin['email']); ?>">
+                                    </div>
+                                    
+                                    <div class="col-md-4 mb-3">
+                                        <label class="form-label">Nova Senha</label>
+                                        <div class="input-group">
+                                            <input type="password" class="form-control" name="admin_senha" 
+                                                   placeholder="Digite para alterar a senha">
+                                            <button class="btn btn-outline-secondary" type="button" onclick="toggleSenha(this)">
+                                                <i class="bi bi-eye"></i>
+                                            </button>
+                                        </div>
+                                        <div class="form-text">Deixe em branco para manter a senha atual</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                         <hr class="my-4">
 
                         <button type="submit" class="btn btn-primary">
@@ -552,6 +683,21 @@ function excluirEndereco(id) {
             alert('Erro ao excluir endereço');
         }
     });
+}
+
+function toggleSenha(button) {
+    const input = button.parentElement.querySelector('input');
+    const icon = button.querySelector('i');
+    
+    if (input.type === 'password') {
+        input.type = 'text';
+        icon.classList.remove('bi-eye');
+        icon.classList.add('bi-eye-slash');
+    } else {
+        input.type = 'password';
+        icon.classList.remove('bi-eye-slash');
+        icon.classList.add('bi-eye');
+    }
 }
 </script>
 </body>
