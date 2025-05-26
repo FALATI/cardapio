@@ -194,33 +194,35 @@ include 'header.php';
         }
 
         function atualizarSistema(download_url) {
-            if (!confirm('Tem certeza que deseja atualizar o sistema?')) return;
-            
-            document.getElementById('resultado_verificacao').innerHTML = `
-                <div class="text-center">
-                    <div class="spinner-border text-primary" role="status">
-                        <span class="visually-hidden">Atualizando...</span>
-                    </div>
-                    <p class="mt-2">Atualizando sistema...</p>
-                </div>
-            `;
+            Swal.fire({
+                title: 'Atualizando sistema',
+                html: 'Iniciando atualização...',
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+                showConfirmButton: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
+            const formData = new FormData();
+            formData.append('acao', 'atualizar');
+            formData.append('download_url', download_url);
             
             fetch('verificar_atualizacao.php', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                },
-                body: `acao=atualizar&download_url=${encodeURIComponent(download_url)}`
+                body: formData
             })
             .then(response => response.json())
             .then(data => {
-                if (data.erro) {
+                if (data.error) {
                     Swal.fire({
                         icon: 'error',
                         title: 'Erro',
-                        text: data.mensagem
+                        text: data.message
                     });
                 } else {
+                    // Mostrar mensagem de sucesso e recarregar
                     Swal.fire({
                         icon: 'success',
                         title: 'Sucesso!',
@@ -230,6 +232,13 @@ include 'header.php';
                         window.location.reload();
                     });
                 }
+            })
+            .catch(error => {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Erro',
+                    text: 'Erro ao atualizar: ' + error.message
+                });
             });
         }
     </script>
