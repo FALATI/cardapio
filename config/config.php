@@ -15,7 +15,10 @@ while($row = $result->fetch_assoc()) {
 }
 
 // Configurações do site usando valor do banco
-define('SITE_URL', 'http://localhost/cardapio');
+// Detectar URL do site automaticamente
+$protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https://' : 'http://';
+$domain = $_SERVER['HTTP_HOST'];
+define('SITE_URL', $protocol . $domain);
 
 // Verificar se existe configuração do nome do site
 $sql = "SELECT valor FROM configuracoes WHERE chave = 'site_nome' LIMIT 1";

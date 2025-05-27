@@ -57,7 +57,11 @@ try {
         error_log("Para usuário ID: " . $usuario['id']);
         
         // Preparar e enviar email
-        $resetLink = SITE_URL . "/redefinir_senha.php?token=" . $token;
+        $resetLink = SITE_URL . "/cardapio/redefinir_senha.php?token=" . $token;
+
+        // Debug para verificar a URL gerada
+        error_log("Link de recuperação gerado: " . $resetLink);
+
         $mensagem = "
         <html>
         <head>
