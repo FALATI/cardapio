@@ -18,7 +18,14 @@ while($row = $result->fetch_assoc()) {
 // Detectar URL do site automaticamente
 $protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https://' : 'http://';
 $domain = $_SERVER['HTTP_HOST'];
-define('SITE_URL', $protocol . $domain);
+$path = dirname($_SERVER['PHP_SELF']);
+
+// Se estiver em localhost, mantém o /cardapio, senão usa apenas o domínio
+if ($domain === 'localhost') {
+    define('SITE_URL', $protocol . $domain . $path);
+} else {
+    define('SITE_URL', $protocol . $domain);
+}
 
 // Verificar se existe configuração do nome do site
 $sql = "SELECT valor FROM configuracoes WHERE chave = 'site_nome' LIMIT 1";
