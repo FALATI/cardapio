@@ -202,7 +202,7 @@ $result = $conn->query($sql);
         // Preenche os campos do formulário
         document.getElementById('produto_id').value = produto.id;
         document.getElementById('nome').value = produto.nome;
-        document.getElementById('preco').value = (produto.preco).replace('.', ',');
+        document.getElementById('preco').value = formatarPrecoExibicao(produto.preco);
         document.getElementById('descricao').value = produto.descricao;
         document.getElementById('categoria_id').value = produto.categoria_id;
         document.getElementById('destaque').checked = produto.destaque == '1';
@@ -228,6 +228,11 @@ $result = $conn->query($sql);
     function salvarProduto() {
         const form = document.getElementById('formProduto');
         const formData = new FormData(form);
+        
+        // Formata o preço antes de enviar
+        const preco = document.getElementById('preco').value;
+        formData.set('preco', formatarPrecoParaEnvio(preco));
+        
         const produto_id = document.getElementById('produto_id').value;
         
         // Mostra loader
@@ -300,11 +305,52 @@ $result = $conn->query($sql);
         }
     });
 
-    // Formata o campo de preço enquanto digita
+    // Substitua as funções de formatação por estas:
+    function formatarPrecoParaEnvio(preco) {
+        if (!preco) return '0,00';
+        
+        // Remove R$ e espaços
+        preco = preco.replace(/R\$\s?/g, '').trim();
+        
+        // Retorna o valor como está, mantendo a vírgula
+        return preco;
+    }
+
+    function formatarPrecoExibicao(valor) {
+        if (!valor) return '';
+        // Mostra o valor como está, sem conversão
+        return valor;
+    }
+
+    // Evento de input para formatar durante digitação
     document.getElementById('preco').addEventListener('input', function(e) {
-        let value = e.target.value.replace(/\D/g, '');
-        value = (Number(value) / 100).toFixed(2);
-        e.target.value = value;
+        let valor = e.target.value;
+        
+        // Remove tudo exceto números e vírgula
+        valor = valor.replace(/[^\d,]/g, '');
+        
+        // Trata vírgulas múltiplas
+        if (valor.includes(',')) {
+            const partes = valor.split(',');
+            // Mantém só a primeira vírgula
+            valor = partes[0] + ',' + partes.slice(1).join('');
+            
+            // Limita a 2 dígitos após a vírgula
+            if (partes[1]) {
+                valor = partes[0] + ',' + partes[1].slice(0, 2);
+            }
+        }
+        
+        // Atualiza o campo com o valor exato digitado
+        e.target.value = valor;
+    });
+
+    // Adiciona o R$ apenas quando o campo perde o foco
+    document.getElementById('preco').addEventListener('blur', function(e) {
+        let valor = e.target.value;
+        if (valor) {
+            e.target.value = 'R$ ' + valor;
+        }
     });
     </script>
 </body>

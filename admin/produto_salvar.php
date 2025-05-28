@@ -21,15 +21,18 @@ try {
     // Limpeza e formatação dos dados
     $nome = cleanInput($_POST['nome']);
     $descricao = cleanInput($_POST['descricao']);
-    $preco = str_replace(['R$', ' ', '.'], '', $_POST['preco']);
-    $preco = str_replace(',', '.', $preco);
+    $preco = str_replace(',', '.', $_POST['preco']); // Converte vírgula para ponto
     $categoria_id = (int)$_POST['categoria_id'];
     $destaque = isset($_POST['destaque']) ? 1 : 0;
 
     // Validação do preço
+    $preco = str_replace(['R$', ' '], '', $preco); // Remove R$ e espaços
     if (!is_numeric($preco)) {
         throw new Exception("Preço inválido");
     }
+
+    // Garante 2 casas decimais
+    $preco = number_format((float)$preco, 2, '.', '');
 
     // Upload da imagem
     $imagem = '';
