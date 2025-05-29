@@ -44,56 +44,147 @@ $pedidos = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
     <style>
         :root {
-            --theme-orange: #ff5733;
+            --bs-primary: #3491D0;
+            --bs-primary-rgb: 52, 145, 208;
+            --bs-primary-hover: #2C475D;
         }
+
+        body {
+            background-color: #f8f9fa;
+            min-height: 100vh;
+        }
+
         .top-bar {
-            background: var(--theme-orange);
-            color: white;
-            padding: 1rem;
+            background: linear-gradient(135deg, #2C475D 0%, #3491D0 100%);
+            padding: 1rem 0;
             margin-bottom: 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
+
+        .top-bar h4 {
+            color: white;
+            margin: 0;
+            font-weight: 500;
+        }
+
         .pedido-card {
             background: white;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
             margin-bottom: 1.5rem;
             overflow: hidden;
+            transition: transform 0.2s ease;
         }
+
+        .pedido-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
         .pedido-header {
-            padding: 1rem;
-            border-bottom: 1px solid #eee;
+            padding: 1.25rem;
+            border-bottom: 1px solid rgba(0,0,0,0.1);
             background: #f8f9fa;
         }
+
         .pedido-body {
-            padding: 1rem;
+            padding: 1.25rem;
         }
+
         .item-row {
-            padding: 0.5rem 0;
-            border-bottom: 1px solid #eee;
+            padding: 1rem 0;
+            border-bottom: 1px solid rgba(0,0,0,0.1);
         }
+
         .item-row:last-child {
             border-bottom: none;
         }
+
         .status-badge {
             font-size: 0.875rem;
             padding: 0.5rem 1rem;
+            font-weight: 500;
         }
-        .pedido-card:hover {
-            transform: scale(1.02);
-            transition: transform 0.3s ease;
+
+        .btn-primary {
+            background-color: var(--bs-primary);
+            border-color: var(--bs-primary);
+        }
+
+        .btn-primary:hover,
+        .btn-primary:active,
+        .btn-primary:focus {
+            background-color: var(--bs-primary-hover) !important;
+            border-color: var(--bs-primary-hover) !important;
+        }
+
+        .btn-outline-primary {
+            color: var(--bs-primary);
+            border-color: var(--bs-primary);
+        }
+
+        .btn-outline-primary:hover,
+        .btn-outline-primary:active,
+        .btn-outline-primary:focus {
+            background-color: var(--bs-primary) !important;
+            border-color: var(--bs-primary) !important;
+            color: white !important;
+        }
+
+        .text-primary {
+            color: var(--bs-primary) !important;
+        }
+
+        .btn-outline-light:hover {
+            color: var(--bs-primary-hover);
+        }
+
+        h6 {
+            color: var(--bs-primary-hover);
+            font-weight: 600;
+        }
+
+        @media (max-width: 576px) {
+            .top-bar {
+                padding: 1rem 0;
+            }
+            
+            .top-bar h4 {
+                font-size: 1.2rem;
+            }
+            
+            .top-bar .btn {
+                padding: 0.375rem 0.75rem;
+                font-size: 0.875rem;
+            }
+            
+            .top-bar .bi {
+                font-size: 0.875rem;
+            }
+
+            .top-buttons {
+                display: flex;
+                gap: 0.5rem;
+            }
+
+            .top-buttons .btn {
+                flex: 1;
+                white-space: nowrap;
+            }
         }
     </style>
 </head>
 <body>
     <div class="top-bar">
         <div class="container">
-            <div class="d-flex justify-content-between align-items-center">
+            <div class="d-flex flex-column flex-sm-row justify-content-between align-items-center gap-2">
                 <h4 class="mb-0">
                     <i class="bi bi-list-ul me-2"></i>Meus Pedidos
                 </h4>
-                <div>
-                    <a href="index.php" class="btn btn-outline-light me-2">
-                        <i class="bi bi-house me-2"></i>Voltar ao Cardápio
+                <div class="top-buttons">
+                    <a href="index.php" class="btn btn-outline-light">
+                        <i class="bi bi-house me-2"></i>Voltar ao Menu
                     </a>
                     <a href="logout.php" class="btn btn-light">
                         <i class="bi bi-box-arrow-right me-2"></i>Sair
@@ -238,5 +329,6 @@ $pedidos = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
         }
     }
     </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

@@ -221,61 +221,105 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
     <style>
         :root {
-            --theme-orange: #ff5733;
+            --bs-primary: #3491D0;
+            --bs-primary-rgb: 52, 145, 208;
+            --bs-primary-hover: #2C475D;
         }
+
         body {
             background-color: #f8f9fa;
+            min-height: 100vh;
         }
+
         .top-bar {
-            background: var(--theme-orange);
-            color: white;
-            padding: 1rem;
+            background: linear-gradient(135deg, #2C475D 0%, #3491D0 100%);
+            padding: 1.5rem 0;
             margin-bottom: 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
+
+        .top-bar h4 {
+            color: white;
+            margin: 0;
+            font-weight: 500;
+        }
+
+        .card, 
         .checkout-card {
             background: white;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            margin-bottom: 1.5rem;
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
             padding: 1.5rem;
+            margin-bottom: 1.5rem;
         }
-        .item-row {
+
+        .list-group-item {
+            border: none;
+            border-bottom: 1px solid #f0f0f0;
             padding: 1rem 0;
-            border-bottom: 1px solid #eee;
         }
-        .item-row:last-child {
+
+        .list-group-item:last-child {
             border-bottom: none;
         }
-        .form-select {
-            border: 2px solid #eee;
-            padding: 0.8rem;
-        }
-        .form-select:focus {
-            border-color: var(--theme-orange);
-            box-shadow: none;
-        }
-        .btn-confirmar {
-            background: var(--theme-orange);
-            border: none;
-            padding: 1rem;
-            font-weight: 600;
-            width: 100%;
-        }
-        .btn-confirmar:hover {
-            background: #e64a2e;
-        }
+
         .miniatura {
             width: 60px;
             height: 60px;
             object-fit: cover;
             border-radius: 8px;
         }
-        #taxa-row {
-            display: none;
-            margin-bottom: 1rem;
+
+        .btn-primary {
+            background: var(--bs-primary);
+            border-color: var(--bs-primary);
+            padding: 0.5rem 1.5rem;
         }
-        #taxa-row.visible {
-            display: flex !important;
+
+        .btn-primary:hover,
+        .btn-primary:active {
+            background: var(--bs-primary-hover) !important;
+            border-color: var(--bs-primary-hover) !important;
+        }
+
+        .btn-outline-primary {
+            color: var(--bs-primary);
+            border-color: var(--bs-primary);
+            padding: 0.5rem 1.5rem;
+        }
+
+        .btn-outline-primary:hover,
+        .btn-outline-primary:active {
+            background: var(--bs-primary) !important;
+            border-color: var(--bs-primary) !important;
+            color: white !important;
+        }
+
+        .form-control:focus,
+        .form-select:focus {
+            border-color: var(--bs-primary);
+            box-shadow: 0 0 0 0.2rem rgba(52, 145, 208, 0.15);
+        }
+
+        .form-label {
+            color: #495057;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+
+        .text-primary {
+            color: var(--bs-primary) !important;
+        }
+
+        h5 {
+            color: #2C475D;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+
+        .text-muted {
+            color: #6c757d !important;
         }
     </style>
 </head>
@@ -330,12 +374,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <!-- Resumo do Pedido -->
             <div class="row justify-content-center">
                 <div class="col-md-8">
-                    <div class="checkout-card">
+                    <div class="card mb-4 p-4">
                         <h5 class="mb-4">Itens do Pedido</h5>
                         <?php foreach ($items as $item): 
                             $subtotal = $item['quantidade'] * $item['preco'];
                         ?>
-                            <div class="item-row">
+                            <div class="list-group-item py-3">
                                 <div class="d-flex align-items-center">
                                     <?php if ($item['imagem']): ?>
                                         <img src="uploads/produtos/<?php echo $item['imagem']; ?>" class="miniatura me-3">
@@ -425,10 +469,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                     <h5 class="mb-0 text-primary" id="total-final"><?php echo formatPrice($total); ?></h5>
                                 </div>
 
-                                <button type="submit" class="btn btn-primary btn-confirmar">
-                                    <i class="bi bi-check2-circle me-2"></i>Confirmar Pedido
-                                </button>
-                                <a href="index.php" class="btn btn-link d-block mt-2">Voltar ao Cardápio</a>
+                                <div class="d-flex justify-content-end gap-2 mt-4">
+                                    <a href="index.php" class="btn btn-outline-primary">
+                                        <i class="bi bi-house me-2"></i>Voltar ao Cardápio
+                                    </a>
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="bi bi-check2-circle me-2"></i>Confirmar Pedido
+                                    </button>
+                                </div>
                             </div>
                         </form>
                     </div>
