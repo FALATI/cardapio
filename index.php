@@ -84,258 +84,44 @@ $result_destaques = $conn->query($sql_destaques);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo $configs['site_titulo'] ?? SITE_NAME; ?></title>
+    
+    <!-- Favicon -->
     <?php if (!empty($configs['favicon'])): ?>
         <link rel="icon" type="image/<?php echo pathinfo($configs['favicon'], PATHINFO_EXTENSION); ?>" 
               href="uploads/favicon/<?php echo $configs['favicon']; ?>">
     <?php endif; ?>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
-    <link rel="stylesheet" href="public/css/style.css">
-    <style>
-        :root {
-            --bs-primary: #ff6b00;
-            --bs-primary-rgb: 255, 107, 0;
-            --bs-primary-hover: #e65100;
-        }
-
-        .btn-primary {
-            background-color: var(--bs-primary);
-            border-color: var(--bs-primary);
-            color: white;
-        }
-
-        .btn-primary:hover,
-        .btn-primary:focus,
-        .btn-primary:active {
-            background-color: var(--bs-primary-hover) !important;
-            border-color: var(--bs-primary-hover) !important;
-            color: white !important;
-        }
-
-        .btn-outline-primary {
-            color: var(--bs-primary);
-            border-color: var(--bs-primary);
-        }
-
-        .btn-outline-primary:hover,
-        .btn-outline-primary:focus,
-        .btn-outline-primary:active,
-        .btn-outline-primary.active {
-            background-color: var(--bs-primary) !important;
-            border-color: var(--bs-primary) !important;
-            color: white !important;
-        }
-
-        .btn-secondary {
-            background-color: #6c757d;
-            border-color: #6c757d;
-        }
-
-        .btn-secondary:hover,
-        .btn-secondary:focus {
-            background-color: #5a6268;
-            border-color: #5a6268;
-        }
-
-        .status-bar {
-            background-color: #343a40;
-            color: white;
-            font-size: 0.9rem;
-            padding: 0.75rem 0;
-        }
-
-        .status-indicator {
-            display: inline-flex;
-            align-items: center;
-            padding: 0.25rem 0.75rem;
-            border-radius: 1rem;
-            font-weight: 500;
-            background: rgba(255, 255, 255, 0.1);
-            color: white;
-        }
-
-        .status-indicator.status-open {
-            background-color: rgba(25, 135, 84, 0.9);    /* Verde para aberto */
-            border: 1px solid rgba(25, 135, 84, 0.2);
-        }
-
-        .status-indicator.status-closed {
-            background-color: rgba(220, 53, 69, 0.9);    /* Vermelho para fechado */
-            border: 1px solid rgba(220, 53, 69, 0.2);
-        }
-
-        .info-button {
-            color: white;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            padding: 0.5rem 1rem;
-            border-radius: 0.5rem;
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            transition: all 0.2s ease;
-        }
-
-        .info-button:hover {
-            background: rgba(255, 255, 255, 0.2);
-            color: white;
-            text-decoration: none;
-            transform: translateY(-1px);
-        }
-
-        .cart-button {
-            position: relative;
-            background: var(--bs-primary) !important;
-            border-color: var(--bs-primary) !important;
-        }
-
-        .cart-button:hover {
-            background: var(--bs-primary-hover) !important;
-            border-color: var(--bs-primary-hover) !important;
-        }
-
-        .cart-count {
-            position: absolute;
-            top: -8px;
-            right: -8px;
-            background-color: white;
-            color: var(--bs-primary);
-            border-radius: 50%;
-            padding: 0.25rem 0.5rem;
-            font-size: 0.75rem;
-            min-width: 1.5rem;
-            text-align: center;
-            font-weight: bold;
-            border: 2px solid var(--bs-primary);
-        }
-
-        .floating-button {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            z-index: 1000;
-            background: #343a40; /* Mesma cor da barra de status */
-            color: white;
-            border-radius: 50px;
-            padding: 12px 25px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            transition: all 0.3s ease;
-        }
-
-        .floating-button:hover {
-            background: #23272b; /* Versão mais escura para hover */
-            color: white;
-            transform: translateY(-2px);
-            box-shadow: 0 6px 15px rgba(0,0,0,0.2);
-            text-decoration: none;
-        }
-
-        .floating-button .badge {
-            background: var(--bs-primary); /* Badge na cor principal */
-            color: white;
-            font-weight: bold;
-        }
-
-        .categorias-scroll .btn-outline-primary.active {
-            background-color: var(--bs-primary);
-            border-color: var(--bs-primary);
-            color: white;
-        }
-
-        .card:hover {
-            border-color: var(--bs-primary);
-        }
-
-        /* Estilos para paginação */
-        .page-link {
-            color: var(--bs-primary);
-        }
-
-        .page-link:hover {
-            color: #e65100;
-            background-color: #fff5eb;
-            border-color: var(--bs-primary);
-        }
-
-        .page-item.active .page-link {
-            background-color: var(--bs-primary);
-            border-color: var(--bs-primary);
-            color: white;
-        }
-
-        /* Estilos para barra de status */
-        .status-bar-items {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        @media (max-width: 768px) {
-            .status-bar-items {
-                flex-direction: column;
-                gap: 0.5rem;
-            }
-
-            .status-indicator {
-                width: 100%;
-                justify-content: center;
-            }
-
-            .info-button {
-                width: 100%;
-                justify-content: center;
-                padding: 0.5rem;
-            }
-
-            .nav-buttons {
-                width: 100%;
-                justify-content: center;
-                gap: 0.5rem;
-            }
-
-            .nav-buttons .btn {
-                flex: 1;
-                text-align: center;
-                display: flex;
-                justify-content: center;
-                align-items: center;
-            }
-        }
-
-        .brand-header {
-            background-color: var(--bs-primary);
-            padding: 2rem 0;
-            margin-bottom: 1rem;
-        }
-
-        .brand-header img {
-            max-height: 120px;
-            width: auto;
-        }
-
-        .brand-header .lead {
-            color: white !important;
-            opacity: 0.9;
-        }
-
-        .brand-header h1 {
-            color: white !important;
-            margin-bottom: 0;
-        }
-    </style>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <!-- CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    
+    <!-- Tema Bootstrap (opcional) -->
+    <link href="https://bootswatch.com/5/lumen/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- CSS Personalizado -->
+    <link rel="stylesheet" href="public/css/style.css?v=<?php echo time(); ?>">
+    
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11" defer></script>
 </head>
 <body>
     <!-- Barra de Status -->
     <div class="status-bar">
         <div class="container">
+            <!-- Logo -->
+            <div class="status-bar-brand mb-3">
+                <?php if (!empty($configs['logo'])): ?>
+                    <img src="uploads/logo/<?php echo $configs['logo']; ?>" 
+                         alt="<?php echo $configs['site_titulo'] ?? SITE_NAME; ?>" 
+                         class="logo-img">
+                <?php else: ?>
+                    <h4 class="text-white mb-0"><?php echo $configs['site_titulo'] ?? SITE_NAME; ?></h4>
+                <?php endif; ?>
+            </div>
+            
+            <!-- Status e Botões -->
             <div class="status-bar-items">
                 <!-- Status da Loja -->
                 <div class="status-indicator <?php echo $loja_aberta ? 'status-open' : 'status-closed'; ?>">
@@ -357,7 +143,7 @@ $result_destaques = $conn->query($sql_destaques);
                     ?>
                 </div>
 
-                <!-- Horário e Endereço -->
+                <!-- Botões de informação -->
                 <div class="nav-buttons">
                     <button type="button" class="info-button" data-bs-toggle="modal" data-bs-target="#horariosModal">
                         <i class="bi bi-clock me-2"></i>
@@ -370,7 +156,7 @@ $result_destaques = $conn->query($sql_destaques);
                     </button>
                 </div>
 
-                <!-- Login e Carrinho -->
+                <!-- Botões de login e carrinho -->
                 <div class="nav-buttons">
                     <?php if (!isset($_SESSION['usuario_id'])): ?>
                         <a href="login.php" class="info-button">
@@ -384,10 +170,12 @@ $result_destaques = $conn->query($sql_destaques);
                         </a>
                     <?php endif; ?>
 
-                    <button type="button" class="info-button cart-button" data-bs-toggle="modal" data-bs-target="#cartModal">
+                    <button type="button" class="info-button" data-bs-toggle="modal" data-bs-target="#cartModal">
                         <i class="bi bi-cart3 me-2"></i>
                         Carrinho
-                        <span class="cart-count"><?php echo $total_carrinho; ?></span>
+                        <?php if ($total_carrinho > 0): ?>
+                            <span class="cart-count"><?php echo $total_carrinho; ?></span>
+                        <?php endif; ?>
                     </button>
                 </div>
             </div>
@@ -572,28 +360,8 @@ $result_destaques = $conn->query($sql_destaques);
         </div>
     </div>
 
-    <!-- Cabeçalho -->
-    <header class="brand-header">
-        <div class="container text-center">
-            <?php if (!empty($configs['logo'])): ?>
-                <img src="uploads/logo/<?php echo $configs['logo']; ?>" 
-                     alt="<?php echo $configs['site_titulo'] ?? SITE_NAME; ?>" 
-                     class="img-fluid"
-                     style="max-height: 120px;"> <!-- Adicionado controle de altura máxima -->
-                <?php if (!empty($configs['site_subtitulo'])): ?>
-                    <p class="lead text-white mt-3 mb-0"><?php echo $configs['site_subtitulo']; ?></p>
-                <?php endif; ?>
-            <?php else: ?>
-                <h1 class="display-4 text-white"><?php echo $configs['site_titulo'] ?? SITE_NAME; ?></h1>
-                <?php if (!empty($configs['site_subtitulo'])): ?>
-                    <p class="lead text-white mb-0"><?php echo $configs['site_subtitulo']; ?></p>
-                <?php endif; ?>
-            <?php endif; ?>
-        </div>
-    </header>
-
     <!-- Menu de Categorias -->
-    <nav class="bg-light py-3 sticky-top shadow-sm">
+    <nav class="bg-light py-3 shadow-sm"> <!-- Removida a classe sticky-top -->
         <div class="container">
             <div class="row">
                 <div class="col-12">
@@ -829,6 +597,19 @@ $result_destaques = $conn->query($sql_destaques);
                 }).format(total);
         }
 
+        // Função para atualizar o contador do carrinho em todos os lugares
+        function atualizarContadorCarrinho(totalItens) {
+            const cartCountElements = document.querySelectorAll('.cart-count');
+            cartCountElements.forEach(element => {
+                if (totalItens > 0) {
+                    element.textContent = totalItens;
+                    element.style.display = 'flex';
+                } else {
+                    element.style.display = 'none';
+                }
+            });
+        }
+
         // Substituir o evento de click dos botões add-to-cart
         document.querySelectorAll('.add-to-cart').forEach(button => {
             button.addEventListener('click', function() {
@@ -865,20 +646,10 @@ $result_destaques = $conn->query($sql_destaques);
             });
         });
 
-        // Localizar e substituir o evento submit do addToCartForm
+        // Atualizar o evento submit do addToCartForm
         document.getElementById('addToCartForm').addEventListener('submit', function(e) {
             e.preventDefault();
             
-            // Verificar se está logado
-            const isLoggedIn = <?php echo isset($_SESSION['usuario_id']) ? 'true' : 'false'; ?>;
-            
-            if (!isLoggedIn) {
-                bootstrap.Modal.getInstance(document.getElementById('addToCartModal')).hide();
-                const loginModal = new bootstrap.Modal(document.getElementById('loginCadastroModal'));
-                loginModal.show();
-                return;
-            }
-
             const formData = new FormData(this);
             
             fetch('adicionar_carrinho.php', {
@@ -888,15 +659,8 @@ $result_destaques = $conn->query($sql_destaques);
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    // Atualizar todos os contadores do carrinho na página
-                    const cartCountElements = document.querySelectorAll('.cart-count');
-                    const totalItens = parseInt(data.total_itens || 0);
-                    
-                    cartCountElements.forEach(element => {
-                        element.textContent = totalItens;
-                        // Garantir que o elemento seja visível
-                        element.style.display = totalItens > 0 ? 'block' : 'none';
-                    });
+                    // Atualizar contador do carrinho
+                    atualizarContadorCarrinho(data.total_itens);
 
                     // Fechar o modal
                     bootstrap.Modal.getInstance(document.getElementById('addToCartModal')).hide();
@@ -909,18 +673,11 @@ $result_destaques = $conn->query($sql_destaques);
                         showConfirmButton: false,
                         timer: 1500
                     });
-
-                    // Atualizar a visibilidade do floating button se existir
-                    const floatingButton = document.querySelector('.floating-button');
-                    if (floatingButton && totalItens > 0) {
-                        floatingButton.style.display = 'flex';
-                    }
                 } else {
                     Swal.fire({
                         icon: 'error',
                         title: 'Erro',
-                        text: data.message || 'Erro ao adicionar ao carrinho',
-                        confirmButtonColor: '#ff6b00'
+                        text: data.message || 'Erro ao adicionar ao carrinho'
                     });
                 }
             })
@@ -929,93 +686,12 @@ $result_destaques = $conn->query($sql_destaques);
                 Swal.fire({
                     icon: 'error',
                     title: 'Erro',
-                    text: 'Erro ao adicionar ao carrinho',
-                    confirmButtonColor: '#ff6b00'
+                    text: 'Erro ao adicionar ao carrinho'
                 });
             });
         });
 
-        // Substituir o evento do cartModal por:
-        document.getElementById('cartModal').addEventListener('show.bs.modal', function(event) {
-            // Verificar primeiro se o usuário está logado
-            const isLoggedIn = <?php echo isset($_SESSION['usuario_id']) ? 'true' : 'false'; ?>;
-            
-            if (!isLoggedIn) {
-                // Previne o modal de abrir
-                event.preventDefault();
-                // Redireciona para o login
-                window.location.href = 'login.php';
-                return;
-            }
-
-            // Se estiver logado, busca os itens do carrinho
-            fetch('buscar_carrinho.php')
-                .then(response => response.json())
-                .then(data => {
-                    let html = '';
-                    if (data.itens && data.itens.length > 0) {
-                        html = `
-                            <table class="table">
-                                <thead>
-                                    <tr>
-                                        <th>Produto</th>
-                                        <th>Quantidade</th>
-                                        <th>Preço</th>
-                                        <th>Subtotal</th>
-                                        <th></th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                        `;
-
-                        data.itens.forEach(item => {
-                            html += `
-                                <tr>
-                                    <td>
-                                        <div class="d-flex align-items-center">
-                                            ${item.imagem ? `<img src="uploads/produtos/${item.imagem}" class="me-2" style="width: 50px; height: 50px; object-fit: cover;">` : ''}
-                                            <div>
-                                                <strong>${item.nome}</strong>
-                                                ${item.observacoes ? `<br><small class="text-muted">${item.observacoes}</small>` : ''}
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td>${item.quantidade}</td>
-                                    <td>${item.preco}</td>
-                                    <td>${item.subtotal}</td>
-                                    <td>
-                                        <button class="btn btn-sm btn-danger" onclick="removerItem(${item.id})">
-                                            <i class="bi bi-trash"></i>
-                                        </button>
-                                    </td>
-                                </tr>
-                            `;
-                        });
-
-                        html += `
-                                </tbody>
-                                <tfoot>
-                                    <tr>
-                                        <td colspan="3" class="text-end"><strong>Total:</strong></td>
-                                        <td colspan="2"><strong>${data.total}</strong></td>
-                                    </tr>
-                                </tfoot>
-                            </table>
-                        `;
-                    } else {
-                        html = '<div class="text-center py-4"><p>Seu carrinho está vazio</p></div>';
-                    }
-
-                    document.getElementById('cartItems').innerHTML = html;
-                })
-              /*  .catch(error => {
-                    console.error('Erro:', error);
-                    document.getElementById('cartItems').innerHTML = 
-                        '<div class="text-center py-4"><p>Erro ao carregar o carrinho</p></div>';
-                }); */
-        });
-
-        // Função para remover item do carrinho
+        // Atualizar a função removerItem
         function removerItem(id) {
             if (!confirm('Tem certeza que deseja remover este item?')) {
                 return;
@@ -1032,7 +708,7 @@ $result_destaques = $conn->query($sql_destaques);
             .then(data => {
                 if (data.success) {
                     // Atualizar contador do carrinho
-                    document.querySelector('.cart-count').textContent = data.total_itens;
+                    atualizarContadorCarrinho(data.total_itens);
                     
                     // Recarregar itens do carrinho
                     document.getElementById('cartModal').dispatchEvent(

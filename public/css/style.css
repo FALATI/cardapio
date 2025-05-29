@@ -1,68 +1,283 @@
+/* Variáveis e Cores */
 :root {
-    --bs-primary: #ff6b00;
-    --bs-primary-rgb: 255, 107, 0;
+    --theme-primary: #343a40;
+    --theme-secondary: #3498db;
+    --theme-success: rgba(25, 135, 84, 0.9);
+    --theme-danger: rgba(220, 53, 69, 0.9);
 }
 
-.btn-primary {
-    background-color: var(--bs-primary);
-    border-color: var(--bs-primary);
+/* Barra de Status com Gradiente */
+.status-bar {
+    background: linear-gradient(135deg, #2c3e50, #3498db);
+    color: white;
+    padding: 0.50rem 0;
 }
 
-.btn-primary:hover {
-    background-color: #e65100;
-    border-color: #e65100;
+.status-bar .container {
+    display: flex;
+    align-items: center;
 }
 
-.btn-outline-primary {
-    color: var(--bs-primary);
-    border-color: var(--bs-primary);
+.status-bar-brand {
+    display: flex;
+    align-items: center;
+    margin-right: 2rem;
+    max-width: 150px; /* Aumentado de 120px para 150px */
 }
 
-.btn-outline-primary:hover {
-    background-color: var(--bs-primary);
-    border-color: var(--bs-primary);
+.logo-img {
+    max-height: 80px; /* Aumentado de 35px para 80px */
+    width: auto;
+    object-fit: contain;
 }
 
-/* Adiciona rolagem suave ao clicar nas categorias */
-html {
-    scroll-behavior: smooth;
+/* Status e Botões */
+.status-bar-items {
+    display: flex;
+    flex: 1;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.5rem;
 }
 
-/* Estilo para o menu de categorias com rolagem */
+.nav-buttons {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.status-indicator {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.5rem 1rem;
+    border-radius: 50px;
+    font-weight: 500;
+    font-size: 0.9rem;
+}
+
+.status-indicator.status-open {
+    background: var(--theme-success);
+}
+
+.status-indicator.status-closed {
+    background: var(--theme-danger);
+}
+
+.info-button {
+    position: relative;
+    color: white;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 50px;
+    padding: 0.5rem 1rem;
+    text-decoration: none;
+    transition: all 0.2s;
+}
+
+.info-button:hover {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+}
+
+/* Estilo do contador do carrinho */
+.cart-count {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    background: #ff6b00;
+    color: white;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Menu de Categorias */
+.nav-categorias {
+    background: white;
+    padding: 1rem 0;
+    margin-bottom: 1rem;
+    box-shadow: 0 2px 15px rgba(0,0,0,0.1);
+    position: relative; /* Substitui a posição sticky */
+    z-index: 10;
+}
+
 .categorias-scroll {
     display: flex;
+    gap: 0.5rem;
     overflow-x: auto;
     padding: 0.5rem 0;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: thin;
-    scrollbar-color: var(--bs-primary) transparent;
+    scrollbar-width: none;
 }
 
 .categorias-scroll::-webkit-scrollbar {
-    height: 6px;
+    display: none;
 }
 
-.categorias-scroll::-webkit-scrollbar-track {
+.categorias-scroll .btn-outline-primary {
+    color: var(--theme-secondary);
+    border: 2px solid var(--theme-secondary);
     background: transparent;
-}
-
-.categorias-scroll::-webkit-scrollbar-thumb {
-    background-color: var(--bs-primary);
-    border-radius: 6px;
-}
-
-/* Anima os cards ao passar o mouse */
-.card {
+    padding: 0.5rem 1.5rem;
+    font-weight: 500;
+    border-radius: 50px;
     transition: all 0.3s ease;
+    white-space: nowrap;
+}
+
+.categorias-scroll .btn-outline-primary:hover,
+.categorias-scroll .btn-outline-primary:focus,
+.categorias-scroll .btn-outline-primary:active {
+    background: var(--theme-secondary);
+    border-color: var(--theme-secondary);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+}
+
+/* Floating Button */
+.floating-button {
+    position: fixed;
+    bottom: 130px; /* Aumentado de 20px para 80px */
+    right: 20px;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    background: linear-gradient(135deg, #2c3e50, #3498db);
+    color: white;
+    padding: 0.75rem 1.25rem;
+    border-radius: 50px;
+    text-decoration: none;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    z-index: 1000;
+    transition: all 0.3s ease;
+}
+
+.floating-button:hover {
+    transform: translateY(-2px);
+    color: white;
+    text-decoration: none;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+}
+
+/* Footer com Gradiente */
+footer {
+    background: linear-gradient(135deg, #2c3e50, #1a1a1a);
+    color: #fff;
+    padding: 3rem 0;
+    margin-top: 4rem;
+}
+
+/* Atualize o CSS para os cards de produtos */
+.card {
+    border: none;
+    border-radius: 15px;
+    box-shadow: 0 5px 30px rgba(0,0,0,0.2); /* Aumentada opacidade de 0.1 para 0.2 */
+    transition: all 0.3s ease;
+    overflow: hidden;
 }
 
 .card:hover {
     transform: translateY(-5px);
-    box-shadow: 0 .5rem 1rem rgba(var(--bs-primary-rgb), .15)!important;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.25); /* Aumentada opacidade de 0.15 para 0.25 */
 }
 
-/* Ajusta imagens dos produtos */
 .card-img-top {
-    height: 200px;
-    object-fit: cover;
+    width: 100%;
+    height: 200px; /* Altura fixa para todas as imagens */
+    object-fit: cover; /* Mantém a proporção cobrindo todo o espaço */
+    border-top-left-radius: 15px;
+    border-top-right-radius: 15px;
+}
+
+.card-body {
+    padding: 1.25rem;
+}
+
+.card-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+    color: #2c3e50;
+}
+
+.card-text {
+    font-size: 0.9rem;
+    color: #6c757d;
+}
+
+.card-footer {
+    background: transparent;
+    border-top: 1px solid rgba(0,0,0,0.05);
+    padding: 1rem 1.25rem;
+}
+
+/* Ajuste do botão adicionar */
+.add-to-cart {
+    padding: 0.5rem 1rem;
+    border-radius: 50px;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+}
+
+/* Ajuste do preço */
+.card-footer h5 {
+    color: #2c3e50;
+    font-weight: 600;
+}
+
+/* Ajuste do grid */
+.row.g-4 {
+    margin-bottom: 2rem;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .status-bar .container {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .status-bar-brand {
+        margin: 0 auto 0.5rem;
+        max-width: 130px; /* Versão mobile um pouco menor */
+    }
+
+    .logo-img {
+        max-height: 40px; /* Versão mobile um pouco menor */
+    }
+
+    .status-bar-items {
+        width: 100%;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    .nav-buttons {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .info-button {
+        flex: 1;
+        justify-content: center;
+    }
+
+    .floating-button {
+        bottom: 100px; /* Ainda mais alto em dispositivos móveis */
+        right: 10px;
+        padding: 0.5rem 1rem;
+    }
+
+    .card-img-top {
+        height: 180px; /* Altura um pouco menor em dispositivos móveis */
+    }
+
+    .categorias-scroll .btn-outline-primary {
+        padding: 0.4rem 1.2rem;
+        font-size: 0.9rem;
+    }
 }

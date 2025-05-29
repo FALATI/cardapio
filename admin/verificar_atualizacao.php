@@ -138,6 +138,7 @@ include 'header.php';
             .then(response => response.json())
             .then(data => {
                 let html = '';
+                const versaoAtual = document.querySelector('h4.mb-0').textContent.trim(); // Pega a versão do version.txt
                 
                 if (data.erro) {
                     html = `
@@ -147,7 +148,22 @@ include 'header.php';
                         </div>
                     `;
                 }
-                else if (data.tem_atualizacao) {
+                // Compara exatamente as versões do version.txt
+                else if (versaoAtual === data.nova_versao) {
+                    html = `
+                        <div class="alert alert-success">
+                            <div class="d-flex align-items-center">
+                                <div class="me-auto">
+                                    <h5 class="mb-1">
+                                        <i class="bi bi-check-circle me-2"></i>
+                                        Sistema Atualizado
+                                    </h5>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+                else {
                     html = `
                         <div class="alert alert-warning">
                             <div class="d-flex align-items-center mb-3">
@@ -157,7 +173,7 @@ include 'header.php';
                                         Nova versão disponível!
                                     </h5>
                                     <div class="text-muted">
-                                        Versão atual: ${data.versao_atual}<br>
+                                        Versão atual: ${versaoAtual}<br>
                                         Versão disponível: ${data.nova_versao}
                                     </div>
                                 </div>
@@ -176,24 +192,6 @@ include 'header.php';
                                 <i class="bi bi-cloud-download me-2"></i>
                                 Atualizar Agora
                             </button>
-                        </div>
-                    `;
-                }
-                else {
-                    html = `
-                        <div class="alert alert-success">
-                            <div class="d-flex align-items-center">
-                                <div class="me-auto">
-                                    <h5 class="mb-1">
-                                        <i class="bi bi-check-circle me-2"></i>
-                                        Sistema Atualizado
-                                    </h5>
-                                    <div class="text-muted">
-                                        Versão atual: ${data.versao_atual}<br>
-                                        Última versão: ${data.nova_versao}
-                                    </div>
-                                </div>
-                            </div>
                         </div>
                     `;
                 }
