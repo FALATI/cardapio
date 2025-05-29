@@ -610,43 +610,35 @@ $result_destaques = $conn->query($sql_destaques);
             });
         }
 
-        // Substituir o evento de click dos botões add-to-cart
+        // Evento para os botões "Adicionar ao Carrinho"
         document.querySelectorAll('.add-to-cart').forEach(button => {
             button.addEventListener('click', function() {
-                // Verificar primeiro se a loja está aberta
-                const lojaAberta = <?php echo $loja_aberta ? 'true' : 'false'; ?>;
-                const horarioAbertura = '<?php echo $horario_hoje ? substr($horario_hoje['abertura'], 0, 5) : ""; ?>';
-                
-                if (!lojaAberta) {
-                    Swal.fire({
-                        icon: 'warning',
-                        title: 'Estabelecimento Fechado',
-                        html: `
-                            ${horarioAbertura 
-                                ? `Abriremos hoje às ${horarioAbertura}.<br>Por favor, retorne mais tarde.` 
-                                : 'Estamos fechados hoje.<br>Por favor, retorne em outro dia.'}
-                        `,
-                        confirmButtonColor: '#ff6b00'
-                    });
-                    return;
-                }
+                const id = this.dataset.id;
+                const nome = this.dataset.nome;
+                const preco = parseFloat(this.dataset.preco);
 
-                // Se estiver aberto, continua com o fluxo normal
+                // Atualizar produto atual
                 produtoAtual = {
-                    id: this.dataset.id,
-                    nome: this.dataset.nome,
-                    preco: parseFloat(this.dataset.preco)
+                    id: id,
+                    nome: nome,
+                    preco: preco
                 };
-                
-                document.getElementById('produto_id').value = produtoAtual.id;
+
+                // Resetar formulário
+                document.getElementById('produto_id').value = id;
                 document.getElementById('quantidade').value = 1;
-                atualizarTotal();
+                document.querySelector('[name="observacoes"]').value = '';
                 
-                new bootstrap.Modal(document.getElementById('addToCartModal')).show();
+                // Atualizar total
+                atualizarTotal();
+
+                // Abrir modal
+                const modal = new bootstrap.Modal(document.getElementById('addToCartModal'));
+                modal.show();
             });
         });
 
-        // Atualizar o evento submit do addToCartForm
+        // Evento submit do formulário de adicionar ao carrinho
         document.getElementById('addToCartForm').addEventListener('submit', function(e) {
             e.preventDefault();
             
@@ -660,11 +652,15 @@ $result_destaques = $conn->query($sql_destaques);
             .then(data => {
                 if (data.success) {
                     // Atualizar contador do carrinho
-                    atualizarContadorCarrinho(data.total_itens);
+                    const cartCount = document.querySelector('.cart-count');
+                    if (cartCount) {
+                        cartCount.textContent = data.total_itens;
+                        cartCount.style.display = 'flex';
+                    }
 
-                    // Fechar o modal
+                    // Fechar modal de adicionar
                     bootstrap.Modal.getInstance(document.getElementById('addToCartModal')).hide();
-                    
+
                     // Mostrar mensagem de sucesso
                     Swal.fire({
                         icon: 'success',
@@ -673,6 +669,11 @@ $result_destaques = $conn->query($sql_destaques);
                         showConfirmButton: false,
                         timer: 1500
                     });
+
+                    // Se o modal do carrinho estiver aberto, atualiza os itens
+                    if (document.getElementById('cartModal').classList.contains('show')) {
+                        document.getElementById('cartModal').dispatchEvent(new Event('show.bs.modal'));
+                    }
                 } else {
                     Swal.fire({
                         icon: 'error',
@@ -691,7 +692,91 @@ $result_destaques = $conn->query($sql_destaques);
             });
         });
 
-        // Atualizar a função removerItem
+        // Atualizar evento do modal do carrinho
+        document.getElementById('cartModal').addEventListener('show.bs.modal', function() {
+    const cartItems = document.getElementById('cartItems');
+    cartItems.innerHTML = '<div class="text-center"><div class="spinner-border" role="status"></div></div>';
+
+    fetch('buscar_carrinho.php')
+        .then(response => response.json())
+        .then(data => {
+            let html = '';
+            if (data.itens && data.itens.length > 0) {
+                html = `
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Produto</th>
+                                <th class="text-center">Qtd</th>
+                                <th class="text-end">Preço</th>
+                                <th class="text-end">Subtotal</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+
+                data.itens.forEach(item => {
+                    // Garante que os valores sejam números
+                    const preco = typeof item.preco === 'string' ? 
+                        parseFloat(item.preco.replace('R$', '').replace('.', '').replace(',', '.')) : 
+                        parseFloat(item.preco);
+                    
+                    const subtotal = typeof item.subtotal === 'string' ? 
+                        parseFloat(item.subtotal.replace('R$', '').replace('.', '').replace(',', '.')) : 
+                        parseFloat(item.subtotal);
+
+                    html += `
+                        <tr>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div>
+                                        <strong>${item.nome}</strong>
+                                        ${item.observacoes ? `<br><small class="text-muted">${item.observacoes}</small>` : ''}
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="text-center">${item.quantidade}</td>
+                            <td class="text-end">R$ ${preco.toFixed(2).replace('.', ',')}</td>
+                            <td class="text-end">R$ ${subtotal.toFixed(2).replace('.', ',')}</td>
+                            <td class="text-end">
+                                <button type="button" class="btn btn-sm btn-danger" onclick="removerItem(${item.id})">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                });
+
+                // Garante que o total seja número
+                const total = typeof data.total === 'string' ? 
+                    parseFloat(data.total.replace('R$', '').replace('.', '').replace(',', '.')) : 
+                    parseFloat(data.total);
+
+                html += `
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <td colspan="3" class="text-end"><strong>Total:</strong></td>
+                                <td class="text-end"><strong>R$ ${total.toFixed(2).replace('.', ',')}</strong></td>
+                                <td></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                `;
+            } else {
+                html = '<div class="text-center py-4"><p>Seu carrinho está vazio</p></div>';
+            }
+
+            cartItems.innerHTML = html;
+        })
+        .catch(error => {
+            console.error('Erro:', error);
+            cartItems.innerHTML = '<div class="alert alert-danger">Erro ao carregar os itens do carrinho</div>';
+        });
+});
+
+        // Função para remover item do carrinho
         function removerItem(id) {
             if (!confirm('Tem certeza que deseja remover este item?')) {
                 return;
@@ -711,9 +796,7 @@ $result_destaques = $conn->query($sql_destaques);
                     atualizarContadorCarrinho(data.total_itens);
                     
                     // Recarregar itens do carrinho
-                    document.getElementById('cartModal').dispatchEvent(
-                        new Event('show.bs.modal')
-                    );
+                    document.getElementById('cartModal').dispatchEvent(new Event('show.bs.modal'));
                 } else {
                     alert(data.error || 'Erro ao remover item');
                 }
@@ -724,74 +807,32 @@ $result_destaques = $conn->query($sql_destaques);
             });
         }
 
-        document.addEventListener('DOMContentLoaded', function() {
-            const cadastroForm = document.getElementById('cadastroForm');
-            if (cadastroForm) {
-                cadastroForm.addEventListener('submit', function(e) {
-                    e.preventDefault();
-                    
-                    const btnSubmit = this.querySelector('button[type="submit"]');
-                    const btnText = btnSubmit.innerHTML;
-                    btnSubmit.disabled = true;
-                    btnSubmit.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Aguarde...';
-                    
-                    const formData = new FormData(this);
-                    
-                    fetch('cadastrar_cliente.php', {
-                        method: 'POST',
-                        body: formData
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            const modal = bootstrap.Modal.getInstance(document.getElementById('loginCadastroModal'));
-                            if (modal) {
-                                modal.hide();
-                            }
-
-                            // Adicionar ao carrinho e redirecionar
-                            const addToCartForm = document.getElementById('addToCartForm');
-                            if (addToCartForm) {
-                                const cartFormData = new FormData(addToCartForm);
-                                
-                                fetch('adicionar_carrinho.php', {
-                                    method: 'POST',
-                                    body: cartFormData
-                                })
-                                .then(() => {
-                                    // Forçar redirecionamento após adicionar ao carrinho
-                                    window.location.href = 'index.php';
-                                })
-                                .catch(() => {
-                                    // Em caso de erro, também redireciona
-                                    window.location.href = 'index.php';
-                                });
-                            }
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Erro:', error);
-                    })
-                    .finally(() => {
-                        btnSubmit.disabled = false;
-                        btnSubmit.innerHTML = btnText;
-                    });
-                });
+        // Função para verificar pedidos pendentes
+function verificarPedidosPendentes() {
+    fetch('verificar_pedidos.php')
+        .then(response => response.json())
+        .then(data => {
+            const floatingButton = document.querySelector('.floating-button');
+            const badge = document.querySelector('.floating-button .badge');
+            
+            if (data.total_pendentes > 0) {
+                if (badge) badge.textContent = data.total_pendentes;
+                if (floatingButton) floatingButton.style.display = 'flex';
+            } else {
+                if (floatingButton) floatingButton.style.display = 'none';
             }
+        })
+        .catch(error => console.error('Erro ao verificar pedidos:', error));
+}
 
-            // Adicionar máscara do telefone também dentro do DOMContentLoaded
-            const telefoneInput = document.getElementById('telefone');
-            if (telefoneInput) {
-                telefoneInput.addEventListener('input', function(e) {
-                    let value = e.target.value.replace(/\D/g, '');
-                    if (value.length <= 11) {
-                        value = value.replace(/^(\d{2})(\d)/g, '($1) $2');
-                        value = value.replace(/(\d)(\d{4})$/, '$1-$2');
-                        e.target.value = value;
-                    }
-                });
-            }
-        });
+// Iniciar verificação periódica se o usuário estiver logado
+<?php if (isset($_SESSION['usuario_id'])): ?>
+    // Primeira verificação
+    verificarPedidosPendentes();
+    
+    // Verificar a cada 30 segundos
+    setInterval(verificarPedidosPendentes, 30000);
+<?php endif; ?>
     </script>
 
     <!-- Modal de Login ou Cadastro -->
@@ -891,47 +932,27 @@ $result_destaques = $conn->query($sql_destaques);
         $stmt_usuario->bind_param("i", $_SESSION['usuario_id']);
         $stmt_usuario->execute();
         $result_usuario = $stmt_usuario->get_result();
-        $usuario_data = $result_usuario->fetch_assoc();
-        $nome_usuario = $usuario_data['nome'] ?? '';
-
-        if (!empty($nome_usuario)) {
-            // Contar pedidos pendentes
-            $sql_pendentes = "SELECT COUNT(*) as total FROM pedidos 
-                             WHERE usuario_id = ? 
-                             AND status NOT IN ('entregue', 'cancelado')";
-            $stmt_pendentes = $conn->prepare($sql_pendentes);
-            $stmt_pendentes->bind_param("i", $_SESSION['usuario_id']);
-            $stmt_pendentes->execute();
-            $result_pendentes = $stmt_pendentes->get_result();
-            $total_pendentes = $result_pendentes->fetch_assoc()['total'] ?? 0;
-
-            if ($total_pendentes > 0):
+        
+        if ($result_usuario && $result_usuario->num_rows > 0) {
+            $usuario = $result_usuario->fetch_assoc();
             ?>
-                <a href="meus_pedidos.php" class="floating-button">
-                    <i class="bi bi-person-circle"></i>
-                    <?php echo explode(' ', $nome_usuario)[0]; ?>
-                    <span class="badge rounded-pill"><?php echo $total_pendentes; ?></span>
-                </a>
-
-                <script>
-                function verificarPedidosPendentes() {
-                    fetch('verificar_pedidos.php')
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.total_pendentes > 0) {
-                                document.querySelector('.floating-button .badge').textContent = data.total_pendentes;
-                                document.querySelector('.floating-button').style.display = 'flex';
-                            } else {
-                                document.querySelector('.floating-button').style.display = 'none';
-                            }
-                        });
+            <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                // Atualizar nome do usuário no cabeçalho
+                const nomeUsuario = "<?php echo addslashes($usuario['nome']); ?>";
+                const boasVindas = document.getElementById('boasVindas');
+                
+                if (boasVindas) {
+                    boasVindas.innerHTML = 'Bem-vindo, ' + nomeUsuario + '!';
                 }
 
-                // Verificar a cada 30 segundos
-                setInterval(verificarPedidosPendentes, 30000);
-                </script>
-            <?php endif; 
+                // Verificar pedidos pendentes ao abrir a página
+                verificarPedidosPendentes();
+            });
+            </script>
+            <?php
         }
-    } ?>
+    }
+    ?>
 </body>
 </html>
