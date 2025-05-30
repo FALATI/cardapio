@@ -67,6 +67,7 @@
 <style>
     /* Sidebar */
     .sidebar {
+        position: fixed; /* Adicionar position fixed */
         top: 0;
         left: 0;
         min-height: 100vh;
@@ -74,6 +75,8 @@
         background: linear-gradient(135deg, #2C475D 0%, #3491D0 100%);
         padding-top: 0.8rem; /* reduzido de 1rem */
         box-shadow: 4px 0 10px rgba(0,0,0,0.1);
+        z-index: 9999; /* Aumentar z-index para ficar na frente */
+        overflow-y: auto; /* Adicionar scroll vertical se necessário */
     }
 
     /* Header da Sidebar */
