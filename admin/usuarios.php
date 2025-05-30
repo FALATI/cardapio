@@ -30,19 +30,164 @@ $result = $conn->query($sql);
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
     <style>
+    :root {
+        --bs-primary: #3491D0;
+        --bs-primary-rgb: 52, 145, 208;
+        --bs-primary-hover: #2C475D;
+    }
+
+    body {
+        background-color: #f8f9fa;
+        min-height: 100vh;
+    }
+
+    /* Sidebar */
+    .sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 100vh;
+        width: 250px;
+        background: linear-gradient(135deg, #2C475D 0%, #3491D0 100%);
+        padding-top: 1rem;
+        transition: all 0.3s ease;
+        z-index: 1000;
+    }
+
+    /* Conteúdo Principal */
+    .main-content {
+        margin-left: 250px;
+        padding: 2rem;
+        transition: margin 0.3s ease;
+    }
+
+    /* Cards e Tabelas */
+    .card {
+        border: none;
+        border-radius: 12px;
+        box-shadow: 0 2px 15px rgba(0,0,0,0.08);
+        margin-bottom: 1.5rem;
+    }
+
+    .table {
+        margin-bottom: 0;
+    }
+
+    .table th {
+        background-color: #f8f9fa;
+        color: #495057;
+        font-weight: 600;
+        border-top: none;
+    }
+
+    .table td {
+        vertical-align: middle;
+    }
+
+    /* Modal */
+    .modal-content {
+        border: none;
+        border-radius: 12px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    }
+
+    .modal-header {
+        background: #f8f9fa;
+        border-bottom: 1px solid rgba(0,0,0,0.1);
+    }
+
+    /* Botões */
+    .btn-primary {
+        background: var(--bs-primary);
+        border-color: var(--bs-primary);
+    }
+
+    .btn-primary:hover,
+    .btn-primary:active {
+        background: var(--bs-primary-hover) !important;
+        border-color: var(--bs-primary-hover) !important;
+    }
+
+    .btn-group-sm > .btn,
+    .btn-sm {
+        padding: 0.4rem 0.8rem;
+    }
+
+    /* Badges */
+    .badge {
+        padding: 0.5em 0.8em;
+        font-weight: 500;
+    }
+
+    /* Forms */
+    .form-control:focus,
+    .form-select:focus {
+        border-color: var(--bs-primary);
+        box-shadow: 0 0 0 0.2rem rgba(52, 145, 208, 0.25);
+    }
+
+    /* Alerts */
+    .alert {
+        border-radius: 10px;
+        border: none;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+
+    /* Responsividade */
+    @media (max-width: 768px) {
         .sidebar {
-            position: fixed;
-            top: 0;
-            left: 0;
-            height: 100vh;
-            width: 250px;
-            background: #343a40;
-            padding-top: 1rem;
+            transform: translateX(-100%);
         }
+
+        .sidebar.show {
+            transform: translateX(0);
+        }
+
         .main-content {
-            margin-left: 250px;
-            padding: 2rem;
+            margin-left: 0;
+            padding: 1rem;
         }
+
+        .table-responsive {
+            border-radius: 12px;
+        }
+    }
+
+    /* Animações */
+    .card {
+        transition: all 0.3s ease;
+    }
+
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(-10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .alert {
+        animation: fadeIn 0.3s ease;
+    }
+
+    .acoes-wrapper {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: nowrap;
+        justify-content: flex-end;
+    }
+
+    @media (max-width: 768px) {
+        .acoes-wrapper {
+            justify-content: center;
+        }
+        
+        .table td:last-child {
+            min-width: 135px; /* Largura mínima para os botões */
+        }
+    }
     </style>
 </head>
 <body>
@@ -157,18 +302,23 @@ $result = $conn->query($sql);
                                     </td>
                                     <td><?php echo date('d/m/Y H:i', strtotime($usuario['created_at'])); ?></td>
                                     <td>
-                                        <button type="button" class="btn btn-sm btn-primary" 
-                                                onclick='editarUsuario(<?php echo json_encode($usuario); ?>)'>
-                                            <i class="bi bi-pencil"></i>
-                                        </button>
-                                        <button type="button" class="btn btn-sm btn-danger" 
-                                                onclick="excluirUsuario(<?php echo $usuario['id']; ?>, '<?php echo addslashes($usuario['nome']); ?>')">
-                                            <i class="bi bi-trash"></i>
-                                        </button>
-                                        <button type="button" class="btn btn-sm btn-info" 
-                                                onclick="verHistoricoPedidos(<?php echo $usuario['id']; ?>, '<?php echo addslashes($usuario['nome']); ?>')">
-                                            <i class="bi bi-cart"></i>
-                                        </button>
+                                        <div class="acoes-wrapper">
+                                            <button type="button" class="btn btn-sm btn-primary" 
+                                                    onclick='editarUsuario(<?php echo json_encode($usuario); ?>)' 
+                                                    title="Editar">
+                                                <i class="bi bi-pencil"></i>
+                                            </button>
+                                            <button type="button" class="btn btn-sm btn-danger" 
+                                                    onclick="excluirUsuario(<?php echo $usuario['id']; ?>, '<?php echo addslashes($usuario['nome']); ?>')" 
+                                                    title="Excluir">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                            <button type="button" class="btn btn-sm btn-info" 
+                                                    onclick="verHistoricoPedidos(<?php echo $usuario['id']; ?>, '<?php echo addslashes($usuario['nome']); ?>')" 
+                                                    title="Histórico">
+                                                <i class="bi bi-cart"></i>
+                                            </button>
+                                        </div>
                                     </td>
                                 </tr>
                             <?php endwhile; ?>
@@ -232,6 +382,12 @@ $result = $conn->query($sql);
             </div>
         </div>
     </div>
+
+    <button class="btn btn-primary d-md-none position-fixed top-0 start-0 mt-2 ms-2 rounded-circle" 
+            onclick="document.querySelector('.sidebar').classList.toggle('show')" 
+            style="z-index: 1001; width: 42px; height: 42px;">
+        <i class="bi bi-list"></i>
+    </button>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
@@ -386,12 +542,16 @@ $result = $conn->query($sql);
     }
 
     function excluirUsuario(id, nome) {
-        if (confirm(`Tem certeza que deseja excluir o usuário "${nome}"?\nEsta ação não pode ser desfeita!`)) {
+        // Preenche o modal de confirmação
+        document.getElementById('nomeUsuarioExcluir').textContent = nome;
+        
+        // Configura o botão de confirmação
+        document.getElementById('btnConfirmarExclusao').onclick = function() {
             const formData = new FormData();
             formData.append('id', id);
             
             // Desabilita botão de exclusão
-            const btn = event.target;
+            const btn = this;
             const btnHtml = btn.innerHTML;
             btn.disabled = true;
             btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
@@ -416,6 +576,7 @@ $result = $conn->query($sql);
                 );
                 
                 if (data.success) {
+                    bootstrap.Modal.getInstance(document.getElementById('confirmarExclusaoModal')).hide();
                     setTimeout(() => window.location.reload(), 1500);
                 }
             })
@@ -438,7 +599,11 @@ $result = $conn->query($sql);
                 btn.disabled = false;
                 btn.innerHTML = btnHtml;
             });
-        }
+        };
+        
+        // Mostra o modal de confirmação
+        const modal = new bootstrap.Modal(document.getElementById('confirmarExclusaoModal'));
+        modal.show();
     }
     </script>
 </body>

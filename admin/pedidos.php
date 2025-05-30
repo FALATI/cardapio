@@ -42,63 +42,151 @@ $result = $conn->query($sql);
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
-        .wrapper {
-            display: flex;
-            min-height: 100vh;
-        }
+    :root {
+        --bs-primary: #3491D0;
+        --bs-primary-rgb: 52, 145, 208;
+        --bs-primary-hover: #2C475D;
+    }
 
+    body {
+        background-color: #f8f9fa;
+    }
+
+    .wrapper {
+        display: flex;
+        min-height: 100vh;
+    }
+
+    .sidebar {
+        width: 250px;
+        background: linear-gradient(135deg, #2C475D 0%, #3491D0 100%);
+        color: white;
+        flex-shrink: 0;
+        transition: all 0.3s ease;
+    }
+
+    .main-content {
+        flex-grow: 1;
+        overflow: auto;
+        background-color: #f8f9fa;
+    }
+
+    .content {
+        padding: 2rem;
+    }
+
+    /* Cards e Tabelas */
+    .card {
+        border: none;
+        border-radius: 12px;
+        box-shadow: 0 2px 15px rgba(0,0,0,0.08);
+    }
+
+    .table {
+        margin-bottom: 0;
+    }
+
+    .table th {
+        border-top: none;
+        background-color: #f8f9fa;
+        color: #495057;
+        font-weight: 600;
+    }
+
+    .table td {
+        vertical-align: middle;
+    }
+
+    /* Status Badges */
+    .badge {
+        padding: 0.5em 0.8em;
+        font-weight: 500;
+    }
+
+    /* Botões */
+    .btn-info {
+        background-color: var(--bs-primary);
+        border-color: var(--bs-primary);
+        color: white;
+    }
+
+    .btn-info:hover {
+        background-color: var(--bs-primary-hover);
+        border-color: var(--bs-primary-hover);
+        color: white;
+    }
+
+    /* Notificações */
+    .notification {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 1rem 1.5rem;
+        background: #28a745;
+        color: white;
+        border-radius: 10px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+        z-index: 1050;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    /* Responsividade */
+    @media (max-width: 768px) {
         .sidebar {
-            width: 250px;
-            background: #333;
-            color: white;
-            flex-shrink: 0;
+            width: 70px;
         }
-
+        
         .main-content {
-            flex-grow: 1;
-            overflow: auto;
+            margin-left: 0;
         }
 
         .content {
-            padding: 1.5rem;
+            padding: 1rem;
         }
 
-        @media (max-width: 768px) {
-            .sidebar {
-                width: 100px;
-            }
-            
-            .sidebar .nav-text {
-                display: none;
-            }
+        .table-responsive {
+            border-radius: 12px;
+        }
+
+        .btn-sm {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.875rem;
         }
 
         .notification {
-            position: fixed;
-            top: 20px;
+            left: 20px;
             right: 20px;
-            padding: 15px;
-            background: #28a745;
-            color: white;
-            border-radius: 5px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-            z-index: 1000;
-            animation: slideIn 0.5s ease-out;
+            text-align: center;
+            justify-content: center;
         }
+    }
 
-        @keyframes slideIn {
-            from {
-                transform: translateX(100%);
-                opacity: 0;
-            }
-            to {
-                transform: translateX(0);
-                opacity: 1;
-            }
+    /* Animações */
+    @keyframes slideIn {
+        from {
+            transform: translateX(100%);
+            opacity: 0;
         }
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+
+    .notification {
+        animation: slideIn 0.3s ease-out;
+    }
     </style>
 </head>
 <body>
+    <button class="btn btn-primary d-md-none position-fixed top-0 start-0 mt-2 ms-2 rounded-circle" 
+            onclick="document.querySelector('.sidebar').classList.toggle('show')" 
+            style="z-index: 1001; width: 42px; height: 42px;">
+        <i class="bi bi-list"></i>
+    </button>
+
     <div class="wrapper">
         <?php include 'sidebar.php'; ?>
         
@@ -198,7 +286,7 @@ $result = $conn->query($sql);
     function checkNewOrders() {
         fetch('check_new_orders.php')
             .then(response => response.json())
-            .then(data => {
+            .then data => {
                 console.log("Verificando pedidos:", data); // Debug
                 
                 if (data.new_order && data.last_order_id > lastOrderId) {

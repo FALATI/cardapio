@@ -34,19 +34,151 @@ $result = $conn->query($sql);
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
     <style>
+    :root {
+        --bs-primary: #3491D0;
+        --bs-primary-rgb: 52, 145, 208;
+        --bs-primary-hover: #2C475D;
+    }
+
+    body {
+        background-color: #f8f9fa;
+        min-height: 100vh;
+    }
+
+    /* Sidebar */
+    .sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 100vh;
+        width: 250px;
+        background: linear-gradient(135deg, #2C475D 0%, #3491D0 100%);
+        padding-top: 1rem;
+        transition: all 0.3s ease;
+        z-index: 1000;
+    }
+
+    /* Conteúdo Principal */
+    .main-content {
+        margin-left: 250px;
+        padding: 2rem;
+        transition: margin 0.3s ease;
+    }
+
+    /* Cards */
+    .card {
+        border: none;
+        border-radius: 12px;
+        box-shadow: 0 2px 15px rgba(0,0,0,0.08);
+    }
+
+    /* Tabela */
+    .table {
+        margin-bottom: 0;
+    }
+
+    .table th {
+        background-color: #f8f9fa;
+        color: #495057;
+        font-weight: 600;
+        border-top: none;
+    }
+
+    .table td {
+        vertical-align: middle;
+    }
+
+    /* Botões */
+    .btn-primary {
+        background: var(--bs-primary);
+        border-color: var(--bs-primary);
+    }
+
+    .btn-primary:hover,
+    .btn-primary:active {
+        background: var(--bs-primary-hover) !important;
+        border-color: var(--bs-primary-hover) !important;
+    }
+
+    /* Modal */
+    .modal-content {
+        border: none;
+        border-radius: 12px;
+    }
+
+    .modal-header {
+        background: #f8f9fa;
+        border-bottom: 1px solid rgba(0,0,0,0.1);
+    }
+
+    /* Form */
+    .form-control:focus,
+    .form-select:focus {
+        border-color: var(--bs-primary);
+        box-shadow: 0 0 0 0.2rem rgba(52, 145, 208, 0.25);
+    }
+
+    /* Imagens */
+    .rounded {
+        border-radius: 8px !important;
+        object-fit: cover;
+    }
+
+    /* Badge */
+    .badge {
+        padding: 0.5em 0.8em;
+        font-weight: 500;
+    }
+
+    /* Responsividade */
+    @media (max-width: 768px) {
         .sidebar {
-            position: fixed;
-            top: 0;
-            left: 0;
-            height: 100vh;
-            width: 250px;
-            background: #343a40;
-            padding-top: 1rem;
+            transform: translateX(-100%);
         }
+
+        .sidebar.show {
+            transform: translateX(0);
+        }
+
         .main-content {
-            margin-left: 250px;
-            padding: 2rem;
+            margin-left: 0;
+            padding: 1rem;
         }
+
+        .table-responsive {
+            border-radius: 12px;
+        }
+
+        .btn-sm {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.875rem;
+        }
+    }
+
+    /* Animações */
+    .card {
+        transition: all 0.3s ease;
+    }
+
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    }
+
+    .alert {
+        animation: slideIn 0.3s ease;
+    }
+
+    @keyframes slideIn {
+        from {
+            transform: translateY(-10px);
+            opacity: 0;
+        }
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
     </style>
 </head>
 <body>
@@ -190,6 +322,12 @@ $result = $conn->query($sql);
                 </div>
             </div>
         </div>
+
+        <button class="btn btn-primary d-md-none position-fixed top-0 start-0 mt-2 ms-2 rounded-circle" 
+                onclick="document.querySelector('.sidebar').classList.toggle('show')" 
+                style="z-index: 1001; width: 42px; height: 42px;">
+            <i class="bi bi-list"></i>
+        </button>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

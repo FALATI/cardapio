@@ -108,96 +108,172 @@ $site_titulo = $config['valor'] ?? SITE_NAME;
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
     <style>
+        :root {
+            --bs-primary: #3491D0;
+            --bs-primary-rgb: 52, 145, 208;
+            --bs-primary-hover: #2C475D;
+        }
+
+        body {
+            background-color: #f8f9fa;
+            min-height: 100vh;
+        }
+
+        .wrapper {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 250px;
+            background: linear-gradient(135deg, #2C475D 0%, #3491D0 100%);
+            color: white;
+            flex-shrink: 0;
+            transition: all 0.3s ease;
+        }
+
+        /* Conteúdo Principal */
+        .main-content {
+            flex-grow: 1;
+            overflow: auto;
+        }
+
+        .content {
+            padding: 1.5rem;
+        }
+
+        /* Header do Pedido */
         .order-header {
-            background: var(--bs-primary);
+            background: linear-gradient(135deg, #2C475D 0%, #3491D0 100%);
             color: white;
             padding: 1.5rem 0;
             margin-bottom: 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
+
+        /* Cards */
+        .card {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.08);
+            margin-bottom: 1.5rem;
+        }
+
+        .card-header {
+            background: #f8f9fa;
+            border-bottom: 1px solid rgba(0,0,0,0.1);
+            padding: 1rem 1.5rem;
+        }
+
+        .card-body {
+            padding: 1.5rem;
+        }
+
+        /* Tabelas */
+        .table {
+            margin-bottom: 0;
+        }
+
+        .table th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #495057;
+            border-top: none;
+        }
+
+        .table td {
+            vertical-align: middle;
+        }
+
+        /* Status Badge */
         .status-badge {
-            font-size: 1rem;
             padding: 0.5rem 1rem;
+            font-weight: 500;
+            font-size: 0.875rem;
         }
+
+        /* Product Image */
         .product-image {
             width: 80px;
             height: 80px;
             object-fit: cover;
             border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
-        .wrapper {
-            display: flex;
-            min-height: 100vh;
+
+        /* Modal de Impressão */
+        #areaImpressao {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.1);
         }
-        .sidebar {
-            width: 250px;
-            background: #333;
-            color: white;
-            flex-shrink: 0;
+
+        /* Botões */
+        .btn-primary {
+            background: var(--bs-primary);
+            border-color: var(--bs-primary);
         }
-        .main-content {
-            flex-grow: 1;
-            overflow: auto;
+
+        .btn-primary:hover {
+            background: var(--bs-primary-hover);
+            border-color: var(--bs-primary-hover);
         }
-        .content {
-            padding: 1.5rem;
+
+        /* Form Controls */
+        .form-select:focus {
+            border-color: var(--bs-primary);
+            box-shadow: 0 0 0 0.2rem rgba(52, 145, 208, 0.25);
         }
+
+        /* Responsividade */
         @media (max-width: 768px) {
             .sidebar {
-                width: 100px;
+                width: 70px;
             }
-            
-            .sidebar .nav-text {
-                display: none;
+
+            .sidebar.show {
+                width: 250px;
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+
+            .content {
+                padding: 1rem;
+            }
+
+            .card-body {
+                padding: 1rem;
+            }
+
+            .status-badge {
+                padding: 0.4rem 0.8rem;
+            }
+
+            .product-image {
+                width: 60px;
+                height: 60px;
             }
         }
-        @media print {
-            @page {
-                size: 65mm 121mm;  /* Invertido para modo retrato */
-                margin: 0;
-            }
 
-            body, html {
-                margin: 0 !important;
-                padding: 0 !important;
-                width: 65mm !important;
-                height: 121mm !important;
-            }
+        /* Animações */
+        .card {
+            transition: all 0.3s ease;
+        }
 
-            body * {
-                visibility: hidden;
-            }
+        .card:hover {
+            transform: translateY(-5px);
+        }
 
-            #areaImpressao, #areaImpressao * {
-                visibility: visible;
-                overflow: visible !important;
-            }
+        .alert {
+            animation: fadeIn 0.3s ease;
+        }
 
-            #areaImpressao {
-                position: absolute;
-                left: 0;
-                top: 0;
-                width: 65mm !important;
-                height: 121mm !important;
-                padding: 2mm !important;
-                margin: 0 !important;
-                font-size: 8px !important;
-                transform: rotate(0deg) !important;
-                transform-origin: 0 0;
-            }
-
-            .modal, .modal-dialog, .modal-content, .modal-body {
-                margin: 0 !important;
-                padding: 0 !important;
-                width: 65mm !important;
-                max-width: none !important;
-                position: absolute !important;
-                left: 0 !important;
-                top: 0 !important;
-            }
-
-            .modal-header, .modal-footer, .sidebar, .main-content > *:not(#areaImpressao) {
-                display: none !important;
-            }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
     </style>
 </head>
@@ -490,6 +566,12 @@ $site_titulo = $config['valor'] ?? SITE_NAME;
             </div>
         </div>
     </div>
+
+    <button class="btn btn-primary d-md-none position-fixed top-0 start-0 mt-2 ms-2 rounded-circle" 
+            onclick="document.querySelector('.sidebar').classList.toggle('show')" 
+            style="z-index: 1001; width: 42px; height: 42px;">
+        <i class="bi bi-list"></i>
+    </button>
 
     <script>
     function imprimirPedido() {

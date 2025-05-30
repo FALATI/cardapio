@@ -239,22 +239,36 @@ function atualizarConfig($chave, $valor) {
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
     <style>
-        /* Estilos da sidebar */
+        :root {
+            --bs-primary: #3491D0;
+            --bs-primary-rgb: 52, 145, 208;
+            --bs-primary-hover: #2C475D;
+        }
+
+        body {
+            background-color: #f8f9fa;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
         .sidebar {
             position: fixed;
             top: 0;
             left: 0;
             height: 100vh;
             width: 250px;
-            background: #343a40;
+            background: linear-gradient(135deg, #2C475D 0%, #3491D0 100%);
             padding-top: 1rem;
+            transition: all 0.3s ease;
             z-index: 1000;
         }
 
         .sidebar .nav-link {
             color: rgba(255, 255, 255, 0.8);
-            padding: 0.5rem 1rem;
-            margin: 0.2rem 0;
+            padding: 0.8rem 1.2rem;
+            margin: 0.2rem 1rem;
+            border-radius: 8px;
+            transition: all 0.3s;
         }
 
         .sidebar .nav-link:hover,
@@ -263,44 +277,124 @@ function atualizarConfig($chave, $valor) {
             background: rgba(255, 255, 255, 0.1);
         }
 
-        /* Conteúdo principal */
+        /* Conteúdo Principal */
         .main-content {
             margin-left: 250px;
             padding: 2rem;
+            transition: margin 0.3s ease;
         }
 
-        /* Estilos específicos da página */
+        /* Cards */
+        .card {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.08);
+            margin-bottom: 1.5rem;
+        }
+
+        .card-header {
+            background: #f8f9fa;
+            border-bottom: 1px solid rgba(0,0,0,0.1);
+            padding: 1rem 1.5rem;
+        }
+
+        .card-body {
+            padding: 1.5rem;
+        }
+
+        /* Formulários */
+        .form-control, .form-select {
+            border-radius: 8px;
+            border: 1px solid #dee2e6;
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: var(--bs-primary);
+            box-shadow: 0 0 0 0.2rem rgba(52, 145, 208, 0.25);
+        }
+
+        /* Tabelas */
+        .table th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #495057;
+        }
+
+        .table td {
+            vertical-align: middle;
+        }
+
+        /* Previews */
         .preview-logo {
             max-width: 200px;
             max-height: 100px;
             object-fit: contain;
-            border: 1px solid #dee2e6;
-            border-radius: 0.25rem;
-            padding: 0.25rem;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            padding: 0.5rem;
             background: white;
+            transition: all 0.3s;
         }
 
-        .card {
-            border: none;
-            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+        .preview-logo:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
         }
 
-        .card-body {
-            padding: 2rem;
-        }
-
-        .form-label {
-            font-weight: 500;
+        /* Botões */
+        .btn {
+            border-radius: 8px;
+            padding: 0.5rem 1rem;
         }
 
         .btn-primary {
-            background-color: #ff6b00;
-            border-color: #ff6b00;
+            background: var(--bs-primary);
+            border-color: var(--bs-primary);
         }
 
         .btn-primary:hover {
-            background-color: #e65100;
-            border-color: #e65100;
+            background: var(--bs-primary-hover);
+            border-color: var(--bs-primary-hover);
+        }
+
+        /* Responsividade */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .sidebar.show {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0;
+                padding: 1rem;
+            }
+
+            .card-body {
+                padding: 1rem;
+            }
+        }
+
+        /* Animações */
+        .card {
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        /* Alerts */
+        .alert {
+            border-radius: 10px;
+            border: none;
+        }
+
+        /* Ícones */
+        .bi {
+            margin-right: 0.5rem;
         }
     </style>
 </head>
@@ -627,6 +721,12 @@ function atualizarConfig($chave, $valor) {
             </div>
         </div>
     </div>
+
+    <button class="btn btn-primary d-md-none position-fixed top-0 start-0 mt-2 ms-2 rounded-circle" 
+            onclick="document.querySelector('.sidebar').classList.toggle('show')" 
+            style="z-index: 1001; width: 42px; height: 42px;">
+        <i class="bi bi-list"></i>
+    </button>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>

@@ -65,72 +65,115 @@
 </div>
 
 <style>
-.sidebar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    height: 100vh;
-    width: 280px;
-    background: #343a40;
-    padding-top: 1rem;
-    z-index: 1000;
-}
+    /* Sidebar */
+    .sidebar {
+        top: 0;
+        left: 0;
+        min-height: 100vh;
+        width: 250px; /* reduzido de 280px */
+        background: linear-gradient(135deg, #2C475D 0%, #3491D0 100%);
+        padding-top: 0.8rem; /* reduzido de 1rem */
+        box-shadow: 4px 0 10px rgba(0,0,0,0.1);
+    }
 
-.sidebar .nav-link {
-    color: rgba(255,255,255,.75) !important;
-    padding: 0.8rem 1.5rem;
-    display: flex;
-    align-items: center;
-    transition: all 0.3s;
-}
+    /* Header da Sidebar */
+    .sidebar h4 {
+        margin-bottom: 0.3rem; /* reduzido de 0.5rem */
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        font-size: 1.1rem; /* adicionado para reduzir tamanho */
+    }
 
-.sidebar .nav-link:hover {
-    color: #fff !important;
-    background: rgba(255,255,255,.1);
-}
+    .sidebar h4 i {
+        margin-right: 10px;
+    }
 
-.sidebar .nav-link.active {
-    color: #fff !important;
-    background: rgba(255,255,255,.1);
-    position: relative;
-}
+    /* Links de Navegação */
+    .sidebar .nav-link {
+        color: rgba(255,255,255,.85) !important;
+        padding: 0.5rem 1rem; /* reduzido de 0.8rem 1.5rem */
+        display: flex;
+        align-items: center;
+        border-radius: 8px;
+        margin: 1px 8px; /* reduzido de 2px 12px */
+        transition: all 0.3s ease;
+    }
 
-.sidebar .nav-link.active:before {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 0;
-    height: 100%;
-    width: 4px;
-    background: #ff6b00;
-}
+    .sidebar .nav-link:hover {
+        color: #fff !important;
+        background: rgba(255,255,255,.1);
+        transform: translateX(5px);
+    }
 
-.sidebar .nav-link i {
-    width: 24px;
-}
+    .sidebar .nav-link.active {
+        color: #fff !important;
+        background: rgba(255,255,255,.15);
+        position: relative;
+    }
 
-.nav-item {
-    margin: 4px 0;
-}
+    .sidebar .nav-link.active:before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        height: 100%;
+        width: 4px;
+        background: #FF9F43;
+        border-radius: 0 4px 4px 0;
+    }
 
-.main-content {
-    margin-left: 280px;
-    padding: 2rem;
-}
+    /* Ícones */
+    .sidebar .nav-link i {
+        width: 24px;
+        font-size: 1.1rem;
+        margin-right: 10px;
+    }
 
-/* Remover quaisquer margens ou paddings personalizados */
-.sidebar .nav {
-    padding: 0;
-}
+    /* Item de Menu */
+    .nav-item {
+        margin: 2px 0; /* reduzido de 4px 0 */
+    }
 
-.sidebar h4 {
-    margin-bottom: 0.5rem;
-}
+    /* Botão de Sair */
+    .sidebar .nav-link.text-danger {
+        color: #ff6b6b !important;
+    }
 
-/* Ajuste para o último item */
-.nav-item:last-child {
-    margin-bottom: 1rem;
-}
+    .sidebar .nav-link.text-danger:hover {
+        background: rgba(255,107,107,0.1);
+    }
+
+    /* Responsividade */
+    @media (max-width: 768px) {
+        .sidebar {
+            position: fixed; /* manter fixed apenas no mobile */
+            transform: translateX(-100%);
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar.show {
+            transform: translateX(0);
+        }
+
+        .main-content {
+            margin-left: 0;
+            padding: 1rem;
+        }
+    }
+
+    /* Animações */
+    .sidebar .nav-link {
+        transition: all 0.3s ease;
+    }
+
+    /* Ajustes de Espaçamento */
+    .sidebar .nav {
+        padding: 0;
+    }
+
+    .nav-item:last-child {
+        margin-bottom: 0.5rem; /* reduzido de 1rem */
+    }
 </style>
 
 <script>

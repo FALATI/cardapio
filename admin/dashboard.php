@@ -47,32 +47,190 @@ $site_titulo = $result_config->fetch_assoc()['valor'] ?? SITE_TITLE;
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
     <style>
+        :root {
+            --bs-primary: #3491D0;
+            --bs-primary-rgb: 52, 145, 208;
+            --bs-primary-hover: #2C475D;
+        }
+
+        body {
+            background-color: #f8f9fa;
+        }
+
+        /* Sidebar responsiva */
         .sidebar {
             position: fixed;
             top: 0;
             left: 0;
             height: 100vh;
             width: 250px;
-            background: #343a40;
+            background: linear-gradient(135deg, #2C475D 0%, #3491D0 100%);
             padding-top: 1rem;
+            transition: transform 0.3s ease;
+            z-index: 1000;
         }
+
+        /* Conteúdo principal responsivo */
         .main-content {
             margin-left: 250px;
             padding: 2rem;
+            transition: margin 0.3s ease;
         }
+
+        /* Cards do dashboard */
         .card-dashboard {
             border: none;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0,0,0,.1);
-            transition: transform 0.2s;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            overflow: hidden;
         }
-        .card-dashboard:hover {
-            transform: translateY(-5px);
+
+        /* Cores dos cards */
+        .card-dashboard.bg-primary {
+            background: linear-gradient(135deg, #4B89DC 0%, #3369B9 100%) !important;
+            border-left: 4px solid #2854A1;
+        }
+
+        .card-dashboard.bg-success {
+            background: linear-gradient(135deg, #37BD8D 0%, #2D9D76 100%) !important;
+            border-left: 4px solid #25865F;
+        }
+
+        .card-dashboard.bg-warning {
+            background: linear-gradient(135deg, #FF9F43 0%, #FF8510 100%) !important;
+            border-left: 4px solid #FF6B00;
+        }
+
+        .card-dashboard.bg-info {
+            background: linear-gradient(135deg, #45ACD6 0%, #3498DB 100%) !important;
+            border-left: 4px solid #2980B9;
+        }
+
+        /* Estilo interno dos cards */
+        .card-dashboard .card-body {
+            padding: 1.5rem;
+        }
+
+        .card-dashboard .card-title {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            opacity: 1;
+            color: rgba(255, 255, 255, 0.95);
+        }
+
+        .card-dashboard h2 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: white;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+
+        .card-dashboard a {
+            font-size: 0.95rem;
+            color: white !important;
+            opacity: 0.9;
+            transition: all 0.3s;
+            text-decoration: none;
+        }
+
+        .card-dashboard small {
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .card-dashboard .bi {
+            font-size: 1.1rem;
+            margin-right: 5px;
+        }
+
+        /* Tabela responsiva */
+        .table-responsive {
+            border-radius: 10px;
+            background: white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .table > :not(caption) > * > * {
+            padding: 1rem;
+        }
+
+        /* Botões e badges */
+        .btn-primary {
+            background: var(--bs-primary);
+            border-color: var(--bs-primary);
+        }
+
+        .btn-primary:hover {
+            background: var(--bs-primary-hover);
+            border-color: var(--bs-primary-hover);
+        }
+
+        /* Media queries para responsividade */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .sidebar.show {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0;
+                padding: 1rem;
+            }
+
+            .card-dashboard {
+                margin-bottom: 1rem;
+            }
+
+            .top-stats {
+                flex-direction: column;
+            }
+
+            .stats-card {
+                margin-bottom: 1rem;
+                width: 100%;
+            }
+        }
+
+        /* Melhorias visuais */
+        .toast {
+            border-radius: 10px;
+        }
+
+        .badge {
+            padding: 0.5em 0.8em;
+            font-weight: 500;
+        }
+
+        .btn-test-sound {
+            border-radius: 50px;
+            padding: 0.5rem 1.2rem;
+        }
+
+        /* Animações */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .toast.show {
+            animation: fadeIn 0.3s ease;
         }
     </style>
 </head>
 <body>
     <?php include 'sidebar.php'; ?>
+
+    <!-- Botão para abrir/fechar sidebar em telas pequenas -->
+    <button class="btn btn-primary d-md-none position-fixed top-0 start-0 mt-2 ms-2 rounded-circle" 
+            onclick="document.querySelector('.sidebar').classList.toggle('show')" 
+            style="z-index: 1001; width: 42px; height: 42px;">
+        <i class="bi bi-list"></i>
+    </button>
 
     <!-- Conteúdo Principal -->
     <div class="main-content">

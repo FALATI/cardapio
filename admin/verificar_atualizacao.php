@@ -51,6 +51,162 @@ include 'header.php';
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Atualização do Sistema - <?php echo SITE_NAME; ?></title>
     <?php include 'header.php'; ?>
+    <style>
+        :root {
+            --bs-primary: #3491D0;
+            --bs-primary-rgb: 52, 145, 208;
+            --bs-primary-hover: #2C475D;
+        }
+
+        body {
+            background-color: #f8f9fa;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            width: 250px;
+            background: linear-gradient(135deg, #2C475D 0%, #3491D0 100%);
+            padding-top: 1rem;
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        /* Conteúdo Principal */
+        .main-content {
+            margin-left: 250px;
+            padding: 2rem;
+            transition: margin 0.3s ease;
+        }
+
+        /* Cards */
+        .card {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.08);
+            margin-bottom: 1.5rem;
+        }
+
+        .card-header {
+            background: #f8f9fa;
+            border-bottom: 1px solid rgba(0,0,0,0.1);
+            padding: 1.25rem;
+        }
+
+        /* Tabs */
+        .nav-tabs {
+            border-bottom: 2px solid #dee2e6;
+        }
+
+        .nav-tabs .nav-link {
+            border: none;
+            color: #6c757d;
+            padding: 1rem 1.5rem;
+            transition: all 0.3s;
+        }
+
+        .nav-tabs .nav-link:hover {
+            border: none;
+            color: var(--bs-primary);
+        }
+
+        .nav-tabs .nav-link.active {
+            border: none;
+            color: var(--bs-primary);
+            position: relative;
+        }
+
+        .nav-tabs .nav-link.active::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: var(--bs-primary);
+        }
+
+        /* Alerts */
+        .alert {
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        /* Progress Bar */
+        .progress {
+            height: 0.8rem;
+            border-radius: 1rem;
+            background-color: #e9ecef;
+        }
+
+        .progress-bar {
+            background-color: var(--bs-primary);
+        }
+
+        /* Botões */
+        .btn-primary {
+            background: var(--bs-primary);
+            border-color: var(--bs-primary);
+            padding: 0.6rem 1.2rem;
+            border-radius: 8px;
+        }
+
+        .btn-primary:hover {
+            background: var(--bs-primary-hover);
+            border-color: var(--bs-primary-hover);
+        }
+
+        /* Versão Info */
+        .version-info {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        /* Responsividade */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .sidebar.show {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0;
+                padding: 1rem;
+            }
+
+            .nav-tabs .nav-link {
+                padding: 0.75rem 1rem;
+            }
+        }
+
+        /* Animações */
+        .card {
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .alert {
+            animation: fadeIn 0.3s ease;
+        }
+    </style>
 </head>
 <body>
     <?php include 'sidebar.php'; ?>
@@ -121,6 +277,12 @@ include 'header.php';
             </div>
         </div>
     </div>
+
+    <button class="btn btn-primary d-md-none position-fixed top-0 start-0 mt-2 ms-2 rounded-circle" 
+            onclick="document.querySelector('.sidebar').classList.toggle('show')" 
+            style="z-index: 1001; width: 42px; height: 42px;">
+        <i class="bi bi-list"></i>
+    </button>
 
     <script>
         function verificarAtualizacao() {
