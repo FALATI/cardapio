@@ -131,12 +131,19 @@ $site_titulo = $config['valor'] ?? SITE_NAME;
             color: white;
             flex-shrink: 0;
             transition: all 0.3s ease;
+            position: fixed;
+            height: 100vh;
+            z-index: 1000;
+            overflow-y: auto;
         }
 
         /* Conteúdo Principal */
         .main-content {
             flex-grow: 1;
+            margin-left: 250px;
             overflow: auto;
+            background-color: #f8f9fa;
+            transition: margin-left 0.3s ease;
         }
 
         .content {
@@ -229,17 +236,19 @@ $site_titulo = $config['valor'] ?? SITE_NAME;
         /* Responsividade */
         @media (max-width: 768px) {
             .sidebar {
-                width: 70px;
-            }
-
-            .sidebar.show {
                 width: 250px;
+                transform: translateX(-100%);
             }
-
+            
+            .sidebar.show {
+                transform: translateX(0);
+            }
+            
             .main-content {
                 margin-left: 0;
+                width: 100%;
             }
-
+            
             .content {
                 padding: 1rem;
             }
@@ -567,51 +576,40 @@ $site_titulo = $config['valor'] ?? SITE_NAME;
         </div>
     </div>
 
+    <!-- Substituir o botão toggle da sidebar -->
     <button class="btn btn-primary d-md-none position-fixed top-0 start-0 mt-2 ms-2 rounded-circle" 
-            onclick="document.querySelector('.sidebar').classList.toggle('show')" 
+            onclick="toggleSidebar()" 
             style="z-index: 1001; width: 42px; height: 42px;">
         <i class="bi bi-list"></i>
     </button>
 
     <script>
-    function imprimirPedido() {
-        const areaImpressao = document.getElementById('areaImpressao');
-        
-        // Define os estilos para impressão
-        const printStyles = {
-            width: '65mm',
-            height: '121mm',
-            padding: '2mm',
-            margin: '0',
-            fontSize: '8px',
-            position: 'absolute',
-            left: '0',
-            top: '0'
-        };
-        
-        // Salva os estilos originais
-        const originalStyles = {};
-        for (let prop in printStyles) {
-            originalStyles[prop] = areaImpressao.style[prop];
-        }
-        
-        // Aplica os estilos de impressão
-        Object.assign(areaImpressao.style, printStyles);
-        
-        // Força o modo retrato
-        const style = document.createElement('style');
-        style.textContent = '@page { size: 65mm 121mm !important; }';
-        document.head.appendChild(style);
-        
-        // Imprime
-        window.print();
-        
-        // Remove o estilo temporário
-        document.head.removeChild(style);
-        
-        // Restaura os estilos originais
-        Object.assign(areaImpressao.style, originalStyles);
+    // Função para alternar a sidebar
+    function toggleSidebar() {
+        document.querySelector('.sidebar').classList.toggle('show');
     }
+
+    // Fechar sidebar quando clicar em algum link dentro dela (em dispositivos móveis)
+    document.querySelectorAll('.sidebar a').forEach(link => {
+        link.addEventListener('click', function() {
+            if (window.innerWidth <= 768) {
+                document.querySelector('.sidebar').classList.remove('show');
+            }
+        });
+    });
+
+    // Fechar sidebar quando clicar fora dela (em dispositivos móveis)
+    document.addEventListener('click', function(event) {
+        const sidebar = document.querySelector('.sidebar');
+        const toggleButton = document.querySelector('.btn-primary.d-md-none.rounded-circle');
+        
+        if (window.innerWidth <= 768 && 
+            !sidebar.contains(event.target) && 
+            !toggleButton.contains(event.target) && 
+            sidebar.classList.contains('show')) {
+            sidebar.classList.remove('show');
+        }
+    });
     </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>

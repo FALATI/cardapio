@@ -111,6 +111,10 @@ $result = $stmt->get_result();
         color: white;
         flex-shrink: 0;
         transition: all 0.3s ease;
+        position: fixed;
+        height: 100vh;
+        z-index: 1000;
+        overflow-y: auto;
     }
 
     .sidebar.show {
@@ -119,7 +123,9 @@ $result = $stmt->get_result();
 
     .main-content {
         flex-grow: 1;
+        margin-left: 250px;
         overflow: auto;
+        transition: margin-left 0.3s ease;
         padding: 20px;
     }
 
@@ -186,29 +192,22 @@ $result = $stmt->get_result();
     /* Responsividade */
     @media (max-width: 768px) {
         .sidebar {
-            width: 70px;
+            width: 250px;
+            transform: translateX(-100%);
         }
-
-        .sidebar .nav-text {
-            display: none;
+        
+        .sidebar.show {
+            transform: translateX(0);
         }
-
+        
         .main-content {
+            margin-left: 0;
+            width: 100%;
             padding: 15px;
         }
-
-        .card-stats {
-            margin-bottom: 1rem;
-        }
-
-        .table-responsive {
-            border-radius: 12px;
-            margin-bottom: 1rem;
-        }
-
-        .btn-sm {
-            padding: 0.25rem 0.5rem;
-            font-size: 0.875rem;
+        
+        .sidebar .nav-text {
+            display: block; /* Manter textos do menu visíveis */
         }
     }
 
@@ -519,6 +518,32 @@ $result = $stmt->get_result();
                 mes.value = '';
                 dia.value = '';
             });
+        });
+    });
+    </script>
+    <script>
+    // Evento para fechar sidebar ao clicar em links
+    document.addEventListener('DOMContentLoaded', function() {
+        // Fechar sidebar quando clicar em algum link dentro dela (em dispositivos móveis)
+        document.querySelectorAll('.sidebar a').forEach(link => {
+            link.addEventListener('click', function() {
+                if (window.innerWidth <= 768) {
+                    document.querySelector('.sidebar').classList.remove('show');
+                }
+            });
+        });
+
+        // Fechar sidebar quando clicar fora dela (em dispositivos móveis)
+        document.addEventListener('click', function(event) {
+            const sidebar = document.querySelector('.sidebar');
+            const toggleButton = document.querySelector('.btn-primary.d-md-none.rounded-circle');
+            
+            if (window.innerWidth <= 768 && 
+                !sidebar.contains(event.target) && 
+                !toggleButton.contains(event.target) && 
+                sidebar.classList.contains('show')) {
+                sidebar.classList.remove('show');
+            }
         });
     });
     </script>

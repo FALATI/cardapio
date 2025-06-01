@@ -63,12 +63,18 @@ $result = $conn->query($sql);
         color: white;
         flex-shrink: 0;
         transition: all 0.3s ease;
+        position: fixed;
+        height: 100vh;
+        z-index: 1000;
+        overflow-y: auto;
     }
 
     .main-content {
         flex-grow: 1;
+        margin-left: 250px;
         overflow: auto;
         background-color: #f8f9fa;
+        transition: margin-left 0.3s ease;
     }
 
     .content {
@@ -135,13 +141,19 @@ $result = $conn->query($sql);
     /* Responsividade */
     @media (max-width: 768px) {
         .sidebar {
-            width: 70px;
+            width: 250px;
+            transform: translateX(-100%);
+        }
+        
+        .sidebar.show {
+            transform: translateX(0);
         }
         
         .main-content {
             margin-left: 0;
+            width: 100%;
         }
-
+        
         .content {
             padding: 1rem;
         }
@@ -178,12 +190,31 @@ $result = $conn->query($sql);
     .notification {
         animation: slideIn 0.3s ease-out;
     }
+
+    /* Botão do menu mobile */
+    .btn-toggle-sidebar {
+        position: fixed;
+        top: 10px;
+        left: 10px;
+        z-index: 1002;
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        display: none;
+    }
+
+    @media (max-width: 768px) {
+        .btn-toggle-sidebar {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+    }
     </style>
 </head>
 <body>
-    <button class="btn btn-primary d-md-none position-fixed top-0 start-0 mt-2 ms-2 rounded-circle" 
-            onclick="document.querySelector('.sidebar').classList.toggle('show')" 
-            style="z-index: 1001; width: 42px; height: 42px;">
+    <button class="btn btn-primary btn-toggle-sidebar d-md-none" 
+            onclick="toggleSidebar()">
         <i class="bi bi-list"></i>
     </button>
 
@@ -427,6 +458,33 @@ $result = $conn->query($sql);
             }
         });
     }
+
+    // Função para alternar a sidebar
+    function toggleSidebar() {
+        document.querySelector('.sidebar').classList.toggle('show');
+    }
+
+    // Fechar sidebar quando clicar em algum link dentro dela (em dispositivos móveis)
+    document.querySelectorAll('.sidebar a').forEach(link => {
+        link.addEventListener('click', function() {
+            if (window.innerWidth <= 768) {
+                document.querySelector('.sidebar').classList.remove('show');
+            }
+        });
+    });
+
+    // Fechar sidebar quando clicar fora dela (em dispositivos móveis)
+    document.addEventListener('click', function(event) {
+        const sidebar = document.querySelector('.sidebar');
+        const toggleButton = document.querySelector('.btn-toggle-sidebar');
+        
+        if (window.innerWidth <= 768 && 
+            !sidebar.contains(event.target) && 
+            !toggleButton.contains(event.target) && 
+            sidebar.classList.contains('show')) {
+            sidebar.classList.remove('show');
+        }
+    });
     </script>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
