@@ -152,7 +152,7 @@ $result_destaques = $conn->query($sql_destaques);
 
                     <button type="button" class="info-button" data-bs-toggle="modal" data-bs-target="#enderecosModal">
                         <i class="bi bi-geo-alt me-2"></i>
-                        Entregas
+                        Onde Entregamos
                     </button>
                 </div>
 
@@ -610,37 +610,75 @@ $result_destaques = $conn->query($sql_destaques);
             });
         }
 
-        // Evento para os botões "Adicionar ao Carrinho"
-        document.querySelectorAll('.add-to-cart').forEach(button => {
-            button.addEventListener('click', function() {
-                const id = this.dataset.id;
-                const nome = this.dataset.nome;
-                const preco = parseFloat(this.dataset.preco);
+        // Evento para os botões "Adicionar" nos produtos
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.add-to-cart').forEach(button => {
+                button.addEventListener('click', function() {
+                    // Verificar primeiro se a loja está aberta
+                    const lojaAberta = <?php echo $loja_aberta ? 'true' : 'false'; ?>;
+                    const horarioHoje = <?php echo json_encode($horario_hoje); ?>;
+                    
+                    if (!lojaAberta) {
+                        let mensagem = '';
+                        if (horarioHoje && horarioHoje.status == 1) {
+                            if ('<?php echo $agora; ?>' < horarioHoje.abertura) {
+                                mensagem = `Abriremos hoje às ${horarioHoje.abertura.substr(0, 5)}`;
+                            } else {
+                                mensagem = `Estamos fechados.<br>Horário de funcionamento: ${horarioHoje.abertura.substr(0, 5)} às ${horarioHoje.fechamento.substr(0, 5)}`;
+                            }
+                        } else {
+                            mensagem = 'Não funcionamos neste dia.';
+                        }
 
-                // Atualizar produto atual
-                produtoAtual = {
-                    id: id,
-                    nome: nome,
-                    preco: preco
-                };
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'Estabelecimento Fechado',
+                            html: mensagem,
+                            confirmButtonColor: '#ff6b00'
+                        });
+                        return;
+                    }
 
-                // Resetar formulário
-                document.getElementById('produto_id').value = id;
-                document.getElementById('quantidade').value = 1;
-                document.querySelector('[name="observacoes"]').value = '';
-                
-                // Atualizar total
-                atualizarTotal();
+                    // Se a loja estiver aberta, continua com o fluxo normal existente
+                    const id = this.dataset.id;
+                    const nome = this.dataset.nome;
+                    const preco = parseFloat(this.dataset.preco);
 
-                // Abrir modal
-                const modal = new bootstrap.Modal(document.getElementById('addToCartModal'));
-                modal.show();
+                    produtoAtual = {
+                        id: id,
+                        nome: nome,
+                        preco: preco
+                    };
+
+                    document.getElementById('produto_id').value = id;
+                    document.getElementById('quantidade').value = 1;
+                    document.querySelector('[name="observacoes"]').value = '';
+                    
+                    atualizarTotal();
+
+                    // Usar o bootstrap para mostrar o modal
+                    const modal = new bootstrap.Modal(document.getElementById('addToCartModal'));
+                    modal.show();
+                });
             });
         });
 
         // Evento submit do formulário de adicionar ao carrinho
         document.getElementById('addToCartForm').addEventListener('submit', function(e) {
             e.preventDefault();
+            
+            // Verificar se está logado
+            const isLoggedIn = <?php echo isset($_SESSION['usuario_id']) ? 'true' : 'false'; ?>;
+            
+            if (!isLoggedIn) {
+                // Fechar modal de carrinho
+                bootstrap.Modal.getInstance(document.getElementById('addToCartModal')).hide();
+                
+                // Abrir modal de login
+                const loginModal = new bootstrap.Modal(document.getElementById('loginCadastroModal'));
+                loginModal.show();
+                return;
+            }
             
             const formData = new FormData(this);
             
@@ -652,11 +690,7 @@ $result_destaques = $conn->query($sql_destaques);
             .then(data => {
                 if (data.success) {
                     // Atualizar contador do carrinho
-                    const cartCount = document.querySelector('.cart-count');
-                    if (cartCount) {
-                        cartCount.textContent = data.total_itens;
-                        cartCount.style.display = 'flex';
-                    }
+                    atualizarContadorCarrinho(data.total_itens);
 
                     // Fechar modal de adicionar
                     bootstrap.Modal.getInstance(document.getElementById('addToCartModal')).hide();
@@ -669,11 +703,6 @@ $result_destaques = $conn->query($sql_destaques);
                         showConfirmButton: false,
                         timer: 1500
                     });
-
-                    // Se o modal do carrinho estiver aberto, atualiza os itens
-                    if (document.getElementById('cartModal').classList.contains('show')) {
-                        document.getElementById('cartModal').dispatchEvent(new Event('show.bs.modal'));
-                    }
                 } else {
                     Swal.fire({
                         icon: 'error',
@@ -954,5 +983,69 @@ function verificarPedidosPendentes() {
         }
     }
     ?>
+
+    <!-- Script para o formulário de cadastro -->
+    <script>
+    // Adicionar o evento de submit para o formulário de cadastro
+    document.addEventListener('DOMContentLoaded', function() {
+        const cadastroForm = document.getElementById('cadastroForm');
+        
+        if (cadastroForm) {
+            cadastroForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const formData = new FormData(this);
+                
+                // Mostrar loading
+                Swal.fire({
+                    title: 'Aguarde...',
+                    text: 'Processando cadastro',
+                    allowOutsideClick: false,
+                    showConfirmButton: false,
+                    willOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+                
+                fetch('cadastrar_cliente.php', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Fechar modal de cadastro
+                        bootstrap.Modal.getInstance(document.getElementById('loginCadastroModal')).hide();
+                        
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Sucesso!',
+                            text: 'Cadastro realizado com sucesso!',
+                            showConfirmButton: false,
+                            timer: 1500
+                        }).then(() => {
+                            // Recarregar a página para atualizar os dados do usuário
+                            window.location.reload();
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Erro',
+                            text: data.message || 'Erro ao realizar cadastro. Tente novamente.'
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('Erro:', error);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Erro',
+                        text: 'Erro ao processar o cadastro. Verifique sua conexão e tente novamente.'
+                    });
+                });
+            });
+        }
+    });
+    </script>
 </body>
 </html>
