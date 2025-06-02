@@ -49,7 +49,7 @@ include 'header.php';
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Atualização do Sistema - <?php echo SITE_NAME; ?></title>
+    <title><?php echo $site_titulo; ?></title>
     <?php include 'header.php'; ?>
     <style>
         :root {
@@ -217,7 +217,7 @@ include 'header.php';
                 <div class="card-header">
                     <h5 class="mb-0">
                         <i class="bi bi-arrow-clockwise"></i>
-                        Atualização do Sistema
+                        Atualização do Sistema - <?php echo $site_nome; ?>
                     </h5>
                 </div>
                 <div class="card-body">

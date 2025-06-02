@@ -569,6 +569,7 @@ function atualizarConfig($chave, $valor) {
                                                 <th>Bairro</th>
                                                 <th>Valor Entrega</th>
                                                 <th>Status</th>
+                                                <th style="width: 80px;">Ações</th><!-- Definindo largura menor -->
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -592,6 +593,14 @@ function atualizarConfig($chave, $valor) {
                                                            value="<?php echo $endereco['id']; ?>" 
                                                            <?php echo $endereco['status'] ? 'checked' : ''; ?>>
                                                 </td>
+                                                <td class="text-center">
+                                                    <!-- Botão Excluir redimensionado e centralizado -->
+                                                    <button type="button" class="btn btn-danger btn-sm d-flex align-items-center justify-content-center mx-auto" 
+                                                            onclick="excluirEndereco(<?php echo $endereco['id']; ?>)"
+                                                            style="width: 30px; height: 30px; padding: 0; border-radius: 4px;">
+                                                        <i class="bi bi-trash m-0"></i>
+                                                    </button>
+                                                </td>
                                             </tr>
                                             <?php endwhile; ?>
                                             <!-- Linha para novo endereço -->
@@ -606,6 +615,7 @@ function atualizarConfig($chave, $valor) {
                                                 <td>
                                                     <input type="checkbox" name="novo_status" class="form-check-input" checked>
                                                 </td>
+                                                <td><!-- Célula vazia para manter o alinhamento --></td>
                                             </tr>
                                         </tbody>
                                     </table>
@@ -764,6 +774,7 @@ document.getElementById('formEndereco').addEventListener('submit', function(e) {
     });
 });
 
+// Função JavaScript para excluir endereço
 function excluirEndereco(id) {
     if (!confirm('Tem certeza que deseja excluir este endereço?')) return;
     
@@ -780,8 +791,12 @@ function excluirEndereco(id) {
         if (data.success) {
             window.location.reload();
         } else {
-            alert('Erro ao excluir endereço');
+            alert(data.message || 'Erro ao excluir endereço');
         }
+    })
+    .catch(error => {
+        console.error('Erro:', error);
+        alert('Erro ao processar a solicitação');
     });
 }
 
