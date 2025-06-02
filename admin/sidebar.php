@@ -139,11 +139,12 @@
 
     /* Botão de Sair */
     .sidebar .nav-link.text-danger {
-        color: #ff6b6b !important;
+        color: rgba(255, 255, 255, 0.9) !important; /* Alterado de #ff6b6b para branco */
     }
 
     .sidebar .nav-link.text-danger:hover {
-        background: rgba(255,107,107,0.1);
+        background: rgba(255, 255, 255, 0.15); /* Alterado para fundo branco transparente */
+        color: #ffffff !important; /* Branco sólido no hover */
     }
 
     /* Responsividade */
