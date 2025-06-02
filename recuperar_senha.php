@@ -78,9 +78,9 @@ try {
 
         $headers = "MIME-Version: 1.0\r\n";
         $headers .= "Content-Type: text/html; charset=UTF-8\r\n";
-        $headers .= "From: " . SITE_NAME . " <noreply@seudominio.com>\r\n";
+        $headers .= "From: " . $site_titulo . " <naoresponda@" . $_SERVER['HTTP_HOST'] . ">\r\n";
 
-        if (!mail($email, "Recuperação de Senha - " . SITE_NAME, $mensagem, $headers)) {
+        if (!mail($email, "Recuperação de Senha - " . $site_titulo, $mensagem, $headers)) {
             throw new Exception('Erro ao enviar e-mail');
         }
 
