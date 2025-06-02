@@ -217,7 +217,7 @@ include 'header.php';
                 <div class="card-header">
                     <h5 class="mb-0">
                         <i class="bi bi-arrow-clockwise"></i>
-                        Atualização do Sistema - <?php echo $site_nome; ?>
+                        Atualização do Sistema - <?php echo $site_titulo; ?>
                     </h5>
                 </div>
                 <div class="card-body">
