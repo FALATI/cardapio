@@ -37,12 +37,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - <?php echo SITE_NAME; ?></title>
+    <!-- Mudar no título da página -->
+    <title>Login - <?php echo $site_titulo; ?></title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
     <style>
         body {
-            background: linear-gradient(135deg, #ff6b6b, #ff8e53);
+            background: linear-gradient(135deg, #2c3e50, #3498db);
             min-height: 100vh;
             display: flex;
             align-items: center;
@@ -58,17 +59,51 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             padding-bottom: 0;
         }
         .btn-primary {
-            background: #ff6b6b;
-            border-color: #ff6b6b;
+            background: #3498db;
+            border-color: #3498db;
             padding: 12px;
         }
         .btn-primary:hover {
-            background: #ff5252;
-            border-color: #ff5252;
+            background: #2980b9;
+            border-color: #2980b9;
         }
         .form-control:focus {
-            border-color: #ff6b6b;
-            box-shadow: 0 0 0 0.25rem rgba(255,107,107,0.25);
+            border-color: #3498db;
+            box-shadow: 0 0 0 0.25rem rgba(52,152,219,0.25);
+        }
+        
+        /* Atualizar apenas a cor dos links */
+        .text-center a {
+            color: #3498db; /* Nova cor para links dentro do card */
+            transition: color 0.3s ease;
+        }
+        .text-center a:hover {
+            color: #2980b9; /* Nova cor para hover */
+        }
+        
+        /* Link de voltar para o cardápio */
+        .text-white {
+            color: #ecf0f1 !important; /* Manter branco para o link de voltar ao cardápio */
+        }
+        .text-white:hover {
+            color: #bdc3c7 !important;
+        }
+        
+        /* Manter o estilo do modal header */
+        .modal-header {
+            background-color: #3498db;
+            color: white;
+        }
+        .modal-header .btn-close {
+            color: white;
+        }
+        
+        /* Ajustar as cores dos botões nas modais SweetAlert */
+        .swal2-confirm {
+            background-color: #3498db !important;
+        }
+        .swal2-confirm:hover {
+            background-color: #2980b9 !important;
         }
     </style>
 </head>
@@ -77,9 +112,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         <div class="row justify-content-center">
             <div class="col-md-6 col-lg-4">
                 <div class="card">
+                    <!-- Mudar no cabeçalho do card de login -->
                     <div class="card-header text-center pt-4">
                         <h2 class="fw-bold mb-0">Login</h2>
-                        <p class="text-muted">Bem-vindo ao <?php echo SITE_NAME; ?></p>
+                        <p class="text-muted">Bem-vindo ao <?php echo $site_titulo; ?></p>
                     </div>
                     <div class="card-body p-4">
                         <?php if (!empty($erro)): ?>
@@ -232,7 +268,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 icon: 'error',
                 title: 'Erro',
                 text: 'As senhas não coincidem',
-                confirmButtonColor: '#ff6b00'
+                confirmButtonColor: '#3498db' // Cor atualizada
             });
             return;
         }
@@ -250,7 +286,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     icon: 'success',
                     title: 'Sucesso!',
                     text: 'Conta criada com sucesso!',
-                    confirmButtonColor: '#ff6b00'
+                    confirmButtonColor: '#3498db' // Cor atualizada
                 }).then(() => {
                     window.location.replace('index.php');
                 });
@@ -259,7 +295,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     icon: 'error',
                     title: 'Erro',
                     text: data.message,
-                    confirmButtonColor: '#ff6b00'
+                    confirmButtonColor: '#3498db' // Cor atualizada
                 });
             }
         })
@@ -269,7 +305,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 icon: 'error',
                 title: 'Erro',
                 text: 'Erro ao processar cadastro',
-                confirmButtonColor: '#ff6b00'
+                confirmButtonColor: '#3498db' // Cor atualizada
             });
         });
     });
@@ -306,7 +342,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     icon: 'success',
                     title: 'E-mail Enviado',
                     text: 'Verifique seu e-mail para recuperar sua senha',
-                    confirmButtonColor: '#ff6b00'
+                    confirmButtonColor: '#3498db' // Cor atualizada
                 });
                 bootstrap.Modal.getInstance(document.getElementById('recuperacaoModal')).hide();
             } else {
@@ -314,7 +350,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     icon: 'error',
                     title: 'Erro',
                     text: data.message,
-                    confirmButtonColor: '#ff6b00'
+                    confirmButtonColor: '#3498db' // Cor atualizada
                 });
             }
         })
@@ -324,7 +360,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 icon: 'error',
                 title: 'Erro',
                 text: 'Erro ao processar solicitação',
-                confirmButtonColor: '#ff6b00'
+                confirmButtonColor: '#3498db' // Cor atualizada
             });
         });
     });
