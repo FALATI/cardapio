@@ -376,22 +376,50 @@ include 'header.php';
         }
 
         function atualizarSistema(download_url) {
-            // Mostrar modal de progresso
+            // Mostrar modal de progresso com efeito aprimorado
             Swal.fire({
                 title: 'Atualizando sistema',
                 html: `
-                    <div class="text-start">
-                        <p class="mb-2">Iniciando atualização...</p>
-                        <div class="progress">
-                            <div class="progress-bar progress-bar-striped progress-bar-animated" 
-                                 role="progressbar" style="width: 0%">0%</div>
+                    <div class="text-center mb-3">
+                        <div class="spinner-border text-primary mb-3" role="status" style="width: 3rem; height: 3rem;">
+                            <span class="visually-hidden">Carregando...</span>
                         </div>
+                        <h5 class="text-primary mb-3">Carregando...</h5>
+                    </div>
+                    <div class="text-start">
+                        <p class="mb-2">Iniciando atualização do sistema</p>
+                        <div class="progress" style="height: 15px;">
+                            <div class="progress-bar progress-bar-striped progress-bar-animated bg-primary" 
+                                 role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
+                        </div>
+                        <p class="text-muted mt-2 small">Por favor, aguarde. Não feche esta janela.</p>
                     </div>
                 `,
                 allowOutsideClick: false,
                 allowEscapeKey: false,
-                showConfirmButton: false
+                showConfirmButton: false,
+                backdrop: `
+                    rgba(0,0,123,0.4)
+                    url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'%3E%3Cstyle%3E.spinner_P7sC%7Banimation:spinner_svv2 1.5s linear infinite;stroke:%233498db%7D@keyframes spinner_svv2%7B100%25%7Btransform:rotate(360deg)%7D%7D%3C/style%3E%3Cg class='spinner_P7sC'%3E%3Ccircle cx='12' cy='12' r='9.5' fill='none' stroke-width='2'/%3E%3C/g%3E%3C/svg%3E")
+                    center 10% no-repeat
+                `
             });
+
+            // Simular progresso (puramente visual)
+            let progress = 0;
+            const interval = setInterval(() => {
+                progress += 5;
+                if (progress <= 90) { // Para em 90% para aguardar a resposta real
+                    const progressBar = document.querySelector('.progress-bar');
+                    if (progressBar) {
+                        progressBar.style.width = progress + '%';
+                        progressBar.textContent = progress + '%';
+                        progressBar.setAttribute('aria-valuenow', progress);
+                    }
+                } else {
+                    clearInterval(interval);
+                }
+            }, 800);
 
             // Preparar dados
             const formData = new FormData();
@@ -404,6 +432,9 @@ include 'header.php';
                 body: formData
             })
             .then(async response => {
+                // Limpar o intervalo quando a resposta chegar
+                clearInterval(interval);
+                
                 // Primeiro pegar o texto da resposta
                 const text = await response.text();
                 
@@ -418,15 +449,26 @@ include 'header.php';
                         throw new Error(data.message);
                     }
                     
-                    // Sucesso
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Sucesso!',
-                        text: data.message || 'Sistema atualizado com sucesso!',
-                        allowOutsideClick: false
-                    }).then(() => {
-                        window.location.reload();
-                    });
+                    // Mostrar 100% antes de fechar
+                    const progressBar = document.querySelector('.progress-bar');
+                    if (progressBar) {
+                        progressBar.style.width = '100%';
+                        progressBar.textContent = '100%';
+                        progressBar.setAttribute('aria-valuenow', 100);
+                    }
+                    
+                    // Pequeno delay para mostrar o 100% antes de exibir o sucesso
+                    setTimeout(() => {
+                        // Sucesso
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Sucesso!',
+                            text: data.message || 'Sistema atualizado com sucesso!',
+                            allowOutsideClick: false
+                        }).then(() => {
+                            window.location.reload();
+                        });
+                    }, 800);
                     
                 } catch (e) {
                     console.error('Erro ao parsear JSON:', e);
@@ -434,6 +476,9 @@ include 'header.php';
                 }
             })
             .catch(error => {
+                // Limpar o intervalo em caso de erro
+                clearInterval(interval);
+                
                 console.error('Erro completo:', error);
                 Swal.fire({
                     icon: 'error',
